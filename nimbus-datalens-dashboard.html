@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nimbus — Datalens Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+/* ============ DESIGN TOKENS ============ */
+:root {
+  --bg: #F6F3EC;
+  --bg-alt: #EFEADC;
+  --surface: #FFFFFF;
+  --surface-2: #FBF9F2;
+  --border: #E3DCCA;
+  --border-strong: #C9BFA5;
+  --ink: #1A1611;
+  --ink-2: #4A4337;
+  --ink-3: #857C6A;
+  --ink-4: #B8AE95;
+
+  --engagement: #1E3A8A;
+  --engagement-soft: #DBE4F5;
+  --progression: #5B21B6;
+  --progression-soft: #E5DBF5;
+  --economy: #065F46;
+  --economy-soft: #CDE5DB;
+  --monetization: #0F766E;
+  --monetization-soft: #CCFBF1;
+  --cash: #059669;
+  --energy: #CA8A04;
+
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Monaco, 'Cascadia Code', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Paper-texture-ish atmosphere */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse at top left, rgba(181, 159, 110, 0.06), transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(100, 120, 140, 0.04), transparent 50%);
+  z-index: 0;
+}
+
+.app { position: relative; z-index: 1; max-width: 1680px; margin: 0 auto; padding: 32px 40px 80px; }
+
+/* ============ HEADER ============ */
+.masthead { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 18px; border-bottom: 1.5px solid var(--ink); margin-bottom: 24px; }
+.masthead .brand { display: flex; align-items: baseline; gap: 22px; }
+.masthead h1 { font-family: var(--font-display); font-weight: 600; font-size: 34px; letter-spacing: -0.02em; line-height: 1.1; }
+.masthead h1 em { font-style: normal; font-weight: 400; color: var(--ink-2); }
+.masthead .issue { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); }
+.masthead .tagline { text-align: right; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); }
+.masthead .tagline strong { display: block; font-family: var(--font-display); font-size: 14px; color: var(--ink); letter-spacing: 0; text-transform: none; font-weight: 600; margin-bottom: 2px; }
+
+/* ============ FILTER BAR ============ */
+.filter-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 0 rgba(26, 22, 17, 0.03);
+}
+.filter-bar-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.filter-bar-label .actions { display: flex; gap: 12px; }
+.filter-bar-label button {
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-2); padding: 0;
+  border-bottom: 1px dotted var(--ink-3);
+}
+.filter-bar-label button:hover { color: var(--ink); border-bottom-style: solid; }
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px 14px;
+}
+.filter {
+  position: relative;
+  display: flex; flex-direction: column; gap: 4px;
+  min-width: 0;
+}
+.filter > label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: flex; justify-content: space-between;
+}
+.filter > label .hint {
+  text-transform: none; letter-spacing: 0; font-size: 9.5px; color: var(--ink-4);
+}
+
+/* Trigger button that opens dropdown */
+.filter-trigger {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 7px 10px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  display: flex; justify-content: space-between; align-items: center; gap: 6px;
+  min-height: 32px;
+  transition: border-color .15s, background .15s;
+}
+.filter-trigger:hover:not(:disabled) { border-color: var(--border-strong); background: var(--surface); }
+.filter-trigger:disabled { opacity: 0.4; cursor: not-allowed; }
+.filter-trigger .chevron { color: var(--ink-3); font-size: 10px; }
+.filter-trigger .selection { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.filter-trigger.active { border-color: var(--ink); background: var(--surface); }
+
+/* Popover dropdown */
+.filter-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 50;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  padding: 6px;
+  min-width: 100%;
+  box-shadow: 0 12px 28px rgba(26, 22, 17, 0.14), 0 2px 6px rgba(26, 22, 17, 0.06);
+  max-height: 280px; overflow-y: auto;
+  display: none;
+}
+.filter-panel.open { display: block; }
+.filter-panel .opt {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px;
+  border-radius: 2px;
+  font-size: 12.5px;
+  cursor: pointer;
+  user-select: none;
+}
+.filter-panel .opt:hover { background: var(--bg-alt); }
+.filter-panel .opt input { accent-color: var(--ink); }
+.filter-panel .opt .count { margin-left: auto; font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); }
+
+/* Date range */
+.date-range { display: flex; gap: 6px; align-items: center; }
+.date-range input[type=date] {
+  background: var(--bg-alt); border: 1px solid var(--border); border-radius: 3px;
+  padding: 6px 8px; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink);
+  min-height: 32px; flex: 1; min-width: 0;
+}
+.date-range input[type=date]:focus { outline: none; border-color: var(--ink); background: var(--surface); }
+.date-range .sep { color: var(--ink-3); font-family: var(--font-mono); font-size: 11px; }
+
+/* Segmented toggle */
+.seg {
+  display: inline-flex;
+  background: var(--bg-alt); border: 1px solid var(--border); border-radius: 3px;
+  padding: 2px; gap: 2px;
+}
+.seg button {
+  flex: 1;
+  background: transparent; border: none; padding: 5px 0;
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ink-2); cursor: pointer; border-radius: 2px;
+}
+.seg button:hover { color: var(--ink); }
+.seg button.on { background: var(--ink); color: var(--bg); }
+
+/* ============ COHORT STRIP ============ */
+.cohort-strip {
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 4px;
+  padding: 14px 22px;
+  margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  align-items: center;
+}
+.cohort-strip .stat .label {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--ink-4); margin-bottom: 3px;
+}
+.cohort-strip .stat .value {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: 20px; color: var(--bg); letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.cohort-strip .stat .value .unit {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-4); margin-left: 4px;
+}
+
+/* ============ A/B STRIP ============ */
+.ab-strip {
+  background: var(--surface);
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  margin-bottom: 18px;
+  padding: 16px 20px 20px;
+  display: none;
+}
+.ab-strip.show { display: block; }
+.ab-strip .ab-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding-bottom: 12px; margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.ab-strip h3 {
+  font-family: var(--font-display); font-size: 16px; font-weight: 600; letter-spacing: -0.01em;
+}
+.ab-strip h3 .tag {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 9.5px; font-weight: 600; letter-spacing: 0.2em;
+  text-transform: uppercase; background: var(--ink); color: var(--bg);
+  padding: 3px 7px; vertical-align: middle; margin-right: 10px;
+  border-radius: 2px;
+}
+.ab-strip .test-name {
+  font-family: var(--font-mono); font-size: 13px; color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.ab-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.ab-table th, .ab-table td {
+  text-align: right; padding: 8px 12px;
+  font-variant-numeric: tabular-nums; font-family: var(--font-mono);
+}
+.ab-table th:first-child, .ab-table td:first-child {
+  text-align: left; font-family: var(--font-body); font-weight: 500;
+}
+.ab-table thead th {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-3); font-weight: 500;
+  border-bottom: 1px solid var(--border); padding-bottom: 10px;
+}
+.ab-table thead th.control-col { color: var(--ink); }
+.ab-table tbody tr { border-bottom: 1px dotted var(--border); }
+.ab-table tbody tr:last-child { border-bottom: none; }
+.ab-table .delta { font-size: 10.5px; display: block; color: var(--ink-3); margin-top: 2px; }
+.ab-table .delta.pos { color: var(--monetization); }
+.ab-table .delta.neg { color: #B91C1C; }
+
+/* ============ SECTIONS ============ */
+.section { margin-top: 32px; }
+.section-head {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 16px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--ink);
+  position: relative;
+}
+.section-head::after {
+  content: ''; position: absolute; bottom: -2.5px; left: 0;
+  width: 64px; height: 4px; background: var(--section-color, var(--ink));
+}
+.section-head .num {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--ink-3); margin-bottom: 2px;
+}
+.section-head h2 {
+  font-family: var(--font-display); font-weight: 600; font-size: 26px;
+  letter-spacing: -0.02em; line-height: 1.15;
+}
+.section-head h2 em { font-style: normal; font-weight: 400; color: var(--ink-2); }
+.section-head .meta {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--ink-3); text-align: right;
+  max-width: 380px;
+}
+
+/* Section color variables */
+.section.engagement    { --section-color: var(--engagement);    --section-soft: var(--engagement-soft); }
+.section.progression   { --section-color: var(--progression);   --section-soft: var(--progression-soft); }
+.section.economy       { --section-color: var(--economy);       --section-soft: var(--economy-soft); }
+.section.monetization  { --section-color: var(--monetization);  --section-soft: var(--monetization-soft); }
+
+/* ============ KPI CARDS ============ */
+.kpi-row { display: grid; gap: 10px; margin-bottom: 14px; }
+.kpi-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.kpi-row.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.kpi-row.cols-5 { grid-template-columns: repeat(5, 1fr); }
+.kpi-row.cols-6 { grid-template-columns: repeat(6, 1fr); }
+
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 14px 16px 12px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--section-color);
+}
+.kpi .kpi-label {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-3);
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 6px;
+  min-height: 24px;
+}
+.kpi .kpi-label .info { color: var(--ink-4); font-size: 10px; }
+.kpi .kpi-value {
+  font-family: var(--font-display);
+  font-weight: 600; font-size: 28px; line-height: 1.1; letter-spacing: -0.02em;
+  color: var(--ink); margin: 2px 0 2px;
+  font-variant-numeric: tabular-nums;
+}
+.kpi .kpi-value.small { font-size: 22px; }
+.kpi .kpi-value .unit {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.05em; color: var(--ink-3); margin-left: 2px;
+  text-transform: lowercase;
+}
+.kpi .kpi-sub {
+  font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-2);
+  font-variant-numeric: tabular-nums; margin-top: 4px;
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.kpi .kpi-sub span { white-space: nowrap; }
+.kpi .kpi-sub b { color: var(--ink); font-weight: 600; }
+
+/* ============ CHART CARDS ============ */
+.chart-grid { display: grid; gap: 10px; margin-bottom: 14px; }
+.chart-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.chart-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.chart-grid.cols-21 { grid-template-columns: 2fr 1fr; }
+.chart-grid.cols-12 { grid-template-columns: 1fr 2fr; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 14px 16px 12px;
+  display: flex; flex-direction: column; min-height: 0;
+}
+.card-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 10px; gap: 12px;
+}
+.card-head h4 {
+  font-family: var(--font-display); font-size: 14px; font-weight: 600;
+  letter-spacing: -0.01em; color: var(--ink);
+}
+.card-head h4 em { font-style: normal; font-weight: 400; color: var(--ink-2); }
+.card-head .card-meta {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.card-body { flex: 1; position: relative; min-height: 0; }
+.chart-wrap { position: relative; height: 220px; }
+.chart-wrap.tall { height: 280px; }
+.chart-wrap.short { height: 160px; }
+
+.caption {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+  color: var(--ink-3); margin-top: 8px; line-height: 1.4;
+}
+
+/* ============ SINKS TABLE ============ */
+.sinks-table {
+  width: 100%; border-collapse: collapse; font-size: 12.5px;
+}
+.sinks-table th, .sinks-table td {
+  padding: 7px 10px; text-align: right;
+  font-variant-numeric: tabular-nums; font-family: var(--font-mono);
+}
+.sinks-table th:first-child, .sinks-table td:first-child {
+  text-align: left; font-family: var(--font-body); font-weight: 500;
+}
+.sinks-table thead th {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-3); font-weight: 500;
+  border-bottom: 1px solid var(--border); padding-bottom: 8px;
+}
+.sinks-table tbody tr { border-bottom: 1px dotted var(--border); }
+.sinks-table tbody tr:last-child { border-bottom: none; }
+.sinks-table tbody tr:hover { background: var(--surface-2); }
+.sinks-table .swatch { display: inline-block; width: 10px; height: 10px; margin-right: 7px; vertical-align: middle; border-radius: 2px; }
+.sinks-table .bar-cell { width: 140px; }
+.sinks-table .bar-inline {
+  position: relative; height: 7px; background: var(--bg-alt); border-radius: 1px; overflow: hidden; margin-top: 4px;
+}
+.sinks-table .bar-inline > span {
+  position: absolute; inset: 0 auto 0 0; border-radius: 1px;
+}
+
+/* ============ FOOTER ============ */
+.colophon {
+  margin-top: 48px; padding-top: 18px;
+  border-top: 1px solid var(--border-strong);
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.colophon strong { color: var(--ink-2); font-weight: 500; }
+
+/* ============ MISC ============ */
+.warning-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #FEF3C7; border: 1px solid #FCD34D;
+  color: #78350F;
+  padding: 4px 10px; border-radius: 2px;
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 500;
+  margin-left: 10px;
+}
+
+.muted { color: var(--ink-3); }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* Responsive */
+@media (max-width: 1280px) {
+  .filter-grid { grid-template-columns: repeat(3, 1fr); }
+  .kpi-row.cols-6 { grid-template-columns: repeat(3, 1fr); }
+  .kpi-row.cols-5 { grid-template-columns: repeat(3, 1fr); }
+  .kpi-row.cols-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px) {
+  .app { padding: 20px; }
+  .filter-grid { grid-template-columns: 1fr 1fr; }
+  .chart-grid.cols-2, .chart-grid.cols-3, .chart-grid.cols-21, .chart-grid.cols-12 { grid-template-columns: 1fr; }
+  .kpi-row.cols-3, .kpi-row.cols-4 { grid-template-columns: 1fr 1fr; }
+  .cohort-strip { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ MASTHEAD ============ -->
+  <header class="masthead">
+    <div class="brand">
+      <div>
+        <div class="issue">Nimbus · Analytics Brief · Vol. 01</div>
+        <h1>Datalens <em>Dashboard</em></h1>
+      </div>
+    </div>
+    <div class="tagline">
+      <strong>New-User Cohort Analysis</strong>
+      D0 – D6 Observation Window
+    </div>
+  </header>
+
+  <!-- ============ FILTER BAR ============ -->
+  <div class="filter-bar">
+    <div class="filter-bar-label">
+      <span>§ Global Filters · applied across all tiles</span>
+      <div class="actions">
+        <button id="reset-filters">Reset all</button>
+      </div>
+    </div>
+
+    <div class="filter-grid">
+      <!-- Row 1 -->
+      <div class="filter">
+        <label>01 · Install Date</label>
+        <div class="date-range">
+          <input type="date" id="f-date-from">
+          <span class="sep">→</span>
+          <input type="date" id="f-date-to">
+        </div>
+      </div>
+
+      <div class="filter" data-filter="country_tier">
+        <label>02 · Country Tier <span class="hint" data-hint></span></label>
+        <button class="filter-trigger" type="button"><span class="selection">All</span><span class="chevron">▾</span></button>
+        <div class="filter-panel"></div>
+      </div>
+
+      <div class="filter" data-filter="platform">
+        <label>03 · Platform <span class="hint" data-hint></span></label>
+        <button class="filter-trigger" type="button"><span class="selection">All</span><span class="chevron">▾</span></button>
+        <div class="filter-panel"></div>
+      </div>
+
+      <div class="filter" data-filter="device_tier">
+        <label>04 · Device Tier <span class="hint" data-hint></span></label>
+        <button class="filter-trigger" type="button"><span class="selection">All</span><span class="chevron">▾</span></button>
+        <div class="filter-panel"></div>
+      </div>
+
+      <div class="filter" data-filter="app_version">
+        <label>05 · App Version <span class="hint" data-hint></span></label>
+        <button class="filter-trigger" type="button"><span class="selection">All</span><span class="chevron">▾</span></button>
+        <div class="filter-panel"></div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="filter" data-filter="install_source">
+        <label>06 · Install Source <span class="hint" data-hint></span></label>
+        <button class="filter-trigger" type="button"><span class="selection">All except suspicious</span><span class="chevron">▾</span></button>
+        <div class="filter-panel"></div>
+      </div>
+
+      <div class="filter">
+        <label>07 · FTUE Completed</label>
+        <div class="seg" id="f-ftue">
+          <button class="on" data-val="all">All</button>
+          <button data-val="yes">Yes</button>
+          <button data-val="no">No</button>
+        </div>
+      </div>
+
+      <div class="filter">
+        <label>08 · IAP Purchased</label>
+        <div class="seg" id="f-iap">
+          <button class="on" data-val="all">All</button>
+          <button data-val="yes">Yes</button>
+          <button data-val="no">No</button>
+        </div>
+      </div>
+
+      <div class="filter" data-filter="test_name" data-single="1">
+        <label>09 · Test Name</label>
+        <button class="filter-trigger" type="button"><span class="selection">— none —</span><span class="chevron">▾</span></button>
+        <div class="filter-panel"></div>
+      </div>
+
+      <div class="filter" data-filter="test_bucket">
+        <label>10 · Test Bucket</label>
+        <button class="filter-trigger" type="button" disabled><span class="selection">—</span><span class="chevron">▾</span></button>
+        <div class="filter-panel"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ COHORT STRIP ============ -->
+  <div class="cohort-strip">
+    <div class="stat">
+      <div class="label">Cohort size (N)</div>
+      <div class="value" id="stat-n">—<span class="unit">players</span></div>
+    </div>
+    <div class="stat">
+      <div class="label">Effective date range</div>
+      <div class="value" id="stat-range" style="font-size: 16px;">—</div>
+    </div>
+    <div class="stat">
+      <div class="label">Mature cohort (D7-ready)</div>
+      <div class="value" id="stat-mature">—<span class="unit">players</span></div>
+    </div>
+    <div class="stat">
+      <div class="label">Filters applied</div>
+      <div class="value" id="stat-filters" style="font-size: 16px;">—</div>
+    </div>
+  </div>
+
+  <!-- ============ A/B STRIP ============ -->
+  <div class="ab-strip" id="ab-strip">
+    <div class="ab-header">
+      <h3><span class="tag">A/B</span> <span id="ab-test-label">—</span></h3>
+      <div class="test-name" id="ab-test-meta">—</div>
+    </div>
+    <div style="overflow-x: auto;">
+      <table class="ab-table" id="ab-table"></table>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 1 — MONETIZATION ============ -->
+  <section class="section monetization">
+    <div class="section-head">
+      <div>
+        <div class="num">§ 01 — Monetization</div>
+        <h2>Conversion, <em>ads &amp; revenue</em></h2>
+      </div>
+      <div class="meta">From ad engagement through<br>IAP conversion to ARPU.</div>
+    </div>
+
+    <div class="kpi-row cols-6">
+      <div class="kpi" id="kpi-iap-conv">
+        <div class="kpi-label">IAP Conversion</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>mature ≥ 8 days</span></div>
+      </div>
+      <div class="kpi" id="kpi-iap-pp">
+        <div class="kpi-label">Avg IAPs / Converter</div>
+        <div class="kpi-value small">—</div>
+        <div class="kpi-sub"><span>repeat strength</span></div>
+      </div>
+      <div class="kpi" id="kpi-iap-rev">
+        <div class="kpi-label">Total IAP Revenue</div>
+        <div class="kpi-value small">—</div>
+        <div class="kpi-sub"><span>USD</span></div>
+      </div>
+      <div class="kpi" id="kpi-ad-rev">
+        <div class="kpi-label">Total Ad Revenue</div>
+        <div class="kpi-value small">—</div>
+        <div class="kpi-sub"><span>USD</span></div>
+      </div>
+      <div class="kpi" id="kpi-total-rev">
+        <div class="kpi-label">Total Revenue</div>
+        <div class="kpi-value small">—</div>
+        <div class="kpi-sub"><span>IAP: <b>—</b></span><span>Ads: <b>—</b></span></div>
+      </div>
+      <div class="kpi" id="kpi-arpu">
+        <div class="kpi-label">D7 ARPU <span class="info">LTV proxy</span></div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>mature cohort only</span></div>
+      </div>
+    </div>
+
+    <div class="kpi-row cols-4">
+      <div class="kpi" id="kpi-arppu">
+        <div class="kpi-label">D7 ARPPU</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>per paying user (IAP)</span></div>
+      </div>
+      <div class="kpi" id="kpi-rewarded-rate">
+        <div class="kpi-label">Rewarded Engagement Rate</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>watched ≥ 1 rewarded</span></div>
+      </div>
+      <div class="kpi" id="kpi-inter-rate">
+        <div class="kpi-label">Interstitial Engagement Rate</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>saw ≥ 1 interstitial</span></div>
+      </div>
+      <div class="kpi" id="kpi-banner-rate">
+        <div class="kpi-label">Banner Engagement Rate</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>saw ≥ 1 banner</span></div>
+      </div>
+    </div>
+
+    <div class="chart-grid" style="grid-template-columns: 1fr;">
+      <div class="card">
+        <div class="card-head">
+          <h4>LTV curve <em>by day from install</em></h4>
+          <div class="card-meta">Total · IAP · Ad — cumulative USD/player</div>
+        </div>
+        <div class="card-body"><div class="chart-wrap tall"><canvas id="chart-ltv"></canvas></div></div>
+        <div class="caption">Cumulative revenue per player as cohorts age. Curves flatten as contribution tapers.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 2 — ENGAGEMENT ============ -->
+  <section class="section engagement">
+    <div class="section-head">
+      <div>
+        <div class="num">§ 02 — Engagement</div>
+        <h2>Retention <em>&amp; playtime</em></h2>
+      </div>
+      <div class="meta">Do new players come back,<br>and how much do they play in week one?</div>
+    </div>
+
+    <div class="kpi-row cols-5">
+      <div class="kpi" id="kpi-d1-ret">
+        <div class="kpi-label">D1 Retention<span class="info mono" id="kpi-d1-n">—</span></div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>mature ≥ 2 days</span></div>
+      </div>
+      <div class="kpi" id="kpi-d3-ret">
+        <div class="kpi-label">D3 Retention<span class="info mono" id="kpi-d3-n">—</span></div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>mature ≥ 4 days</span></div>
+      </div>
+      <div class="kpi" id="kpi-d7-ret">
+        <div class="kpi-label">D7 Retention<span class="info mono" id="kpi-d7-n">—</span></div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>label_mature_d7</span></div>
+      </div>
+      <div class="kpi" id="kpi-playtime">
+        <div class="kpi-label">Median Playtime</div>
+        <div class="kpi-value">—<span class="unit">min</span></div>
+        <div class="kpi-sub"><span>Avg: <b>—</b></span></div>
+      </div>
+      <div class="kpi" id="kpi-session">
+        <div class="kpi-label">Avg Session Length</div>
+        <div class="kpi-value">—<span class="unit">min</span></div>
+        <div class="kpi-sub"><span>per-player mean</span></div>
+      </div>
+    </div>
+
+    <div class="chart-grid cols-21">
+      <div class="card">
+        <div class="card-head">
+          <h4>Retention trend <em>by install cohort</em></h4>
+          <div class="card-meta">D1 · D3 · D7</div>
+        </div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="chart-retention"></canvas></div></div>
+        <div class="caption">Each point is one install-date cohort. Hover for N and exact %.</div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h4>Playtime distribution</h4>
+          <div class="card-meta">bucketed minutes</div>
+        </div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="chart-playtime-hist"></canvas></div></div>
+        <div class="caption">Shape of the tail is the story — long-tail = engaged whales.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 3 — PROGRESSION ============ -->
+  <section class="section progression">
+    <div class="section-head">
+      <div>
+        <div class="num">§ 03 — Progression</div>
+        <h2>Onboarding, core loop, <em>meta systems</em></h2>
+      </div>
+      <div class="meta">How deep do players get in week one?<br>Where do they drop out?</div>
+    </div>
+
+    <div class="kpi-row cols-2">
+      <div class="kpi" id="kpi-ftue">
+        <div class="kpi-label">FTUE Completion</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>completers: <b>—</b></span></div>
+      </div>
+      <div class="kpi" id="kpi-lvl10">
+        <div class="kpi-label">Level 10 Completion</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>max_shop_level ≥ 10</span></div>
+      </div>
+    </div>
+
+    <div class="chart-grid cols-2">
+      <div class="card">
+        <div class="card-head">
+          <h4>FTUE drop-off funnel</h4>
+          <div class="card-meta">step reached (non-completers)</div>
+        </div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="chart-ftue-funnel"></canvas></div></div>
+        <div class="caption">Where tutorialisation is failing. Tall left-side bars = early drops.</div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h4>Max shop level reached</h4>
+          <div class="card-meta">histogram</div>
+        </div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="chart-level-hist"></canvas></div></div>
+        <div class="caption">Primary in-game progression marker. Watch for early cliff-offs.</div>
+      </div>
+    </div>
+
+    <div class="chart-grid cols-2">
+      <div class="card">
+        <div class="card-head">
+          <h4>Meta progression — side-by-side</h4>
+          <div class="card-meta">median &amp; avg tier</div>
+        </div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="chart-meta-compare"></canvas></div></div>
+        <div class="caption">Three meta systems against each other. Gap between median and avg = whale skew.</div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h4>In-game day count</h4>
+          <div class="card-meta">histogram</div>
+        </div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="chart-daycount-hist"></canvas></div></div>
+        <div class="caption">Secondary progression marker — in-game days played.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 4 — ECONOMY & GAMEPLAY ============ -->
+  <section class="section economy">
+    <div class="section-head">
+      <div>
+        <div class="num">§ 04 — Economy &amp; Gameplay</div>
+        <h2>Balances <em>&amp; sinks</em></h2>
+      </div>
+      <div class="meta">Where is currency held, and where<br>is it actually being spent?</div>
+    </div>
+
+    <div class="kpi-row cols-4">
+      <div class="kpi" id="kpi-cash">
+        <div class="kpi-label">Cash Balance (EOW)</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>Median</span><span>Avg: <b>—</b></span></div>
+      </div>
+      <div class="kpi" id="kpi-energy">
+        <div class="kpi-label">Energy Balance (EOW)</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>Median</span><span>Avg: <b>—</b></span></div>
+      </div>
+      <div class="kpi" id="kpi-cashspent">
+        <div class="kpi-label">Avg Cash Spent / Player</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>across all sinks</span></div>
+      </div>
+      <div class="kpi" id="kpi-energyspent">
+        <div class="kpi-label">Avg Energy Spent / Player</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub"><span>across all sinks</span></div>
+      </div>
+    </div>
+
+    <div class="chart-grid cols-12">
+      <div class="card">
+        <div class="card-head">
+          <h4>Cash sinks — share</h4>
+          <div class="card-meta">100% stacked</div>
+        </div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="chart-cash-sinks"></canvas></div></div>
+        <div class="caption">Relative pull of each cash sink. Stripped segments = under-utilised sinks.</div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h4>Cash sinks — breakdown</h4>
+          <div class="card-meta" id="cash-sinks-total">—</div>
+        </div>
+        <div class="card-body">
+          <table class="sinks-table" id="table-cash-sinks"></table>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-grid cols-12">
+      <div class="card">
+        <div class="card-head">
+          <h4>Energy sinks — share</h4>
+          <div class="card-meta">100% stacked</div>
+        </div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="chart-energy-sinks"></canvas></div></div>
+        <div class="caption">Where energy flows. Product pricing typically dominates mid-late game.</div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h4>Energy sinks — breakdown</h4>
+          <div class="card-meta" id="energy-sinks-total">—</div>
+        </div>
+        <div class="card-body">
+          <table class="sinks-table" id="table-energy-sinks"></table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="colophon">
+    <div>Nimbus · Game Design · <strong>Datalens mock-up</strong> · synthetic data</div>
+    <div id="colophon-date">—</div>
+  </div>
+</div>
+
+<script>
+/* =================================================================
+   Nimbus DASHBOARD · SYNTHETIC DATA & LIVE LOGIC
+   ================================================================= */
+
+/* ---------- CONSTANTS ---------- */
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const DAY_MS = 24 * 60 * 60 * 1000;
+const N_PLAYERS = 5200;
+
+const COUNTRY_TIERS = ['US', 'Tier1', 'Tier2', 'Tier3'];
+const PLATFORMS = ['iOS', 'Android'];
+const INSTALL_SOURCES = ['google', 'apple', 'legit', 'unknown', 'suspicious'];
+const DEVICE_TIERS = ['high', 'mid', 'low'];
+const APP_VERSIONS = ['1.4.2', '1.4.1', '1.4.0', '1.3.5'];
+const FTUE_STEPS_ORDER = ['step_3','step_7','step_12','step_18','step_25','step_32','step_40','step_45'];
+const AB_TESTS = [
+  { name: 'energy_conv_v2',   buckets: ['control', 'variant_a', 'variant_b'], share: 0.24, lift: { control: 0, variant_a: 0.04, variant_b: 0.08 } },
+  { name: 'iap_shop_rework',  buckets: ['control', 'variant_a'],              share: 0.22, lift: { control: 0, variant_a: 0.06 } },
+  { name: 'courier_map_v1',   buckets: ['control', 'variant_a', 'variant_b'], share: 0.14, lift: { control: 0, variant_a: 0.03, variant_b: -0.02 } },
+];
+
+const CASH_SINKS = [
+  { key: 'cash_spent_licenses_d0_d6',          label: 'Licenses' },
+  { key: 'cash_spent_expansions_d0_d6',        label: 'Shop Expansions' },
+  { key: 'cash_spent_storage_expansions_d0_d6',label: 'Storage Expansions' },
+  { key: 'cash_spent_store_capacity_d0_d6',    label: 'Store Capacity' },
+  { key: 'cash_spent_player_upgrades_d0_d6',   label: 'Player Upgrades' },
+  { key: 'cash_spent_customization',           label: 'Customization' },
+  { key: 'cash_spent_ems_d0_d6',               label: 'EMS' },
+];
+const ENERGY_SINKS = [
+  { key: 'energy_spent_ems_d0_d6',             label: 'EMS' },
+  { key: 'energy_spent_product_pricing_d0_d6', label: 'Product Pricing' },
+  { key: 'energy_spent_order_speedup',         label: 'Order Speedup' },
+  { key: 'energy_spent_services_licenses',     label: 'Services Licenses' },
+];
+
+/* Color ramps */
+const CASH_COLORS = ['#064E3B','#065F46','#047857','#059669','#10B981','#34D399','#6EE7B7'];
+const ENERGY_COLORS = ['#854D0E','#A16207','#CA8A04','#EAB308'];
+
+/* ---------- CHART.JS GLOBAL CONFIG ---------- */
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#4A4337';
+Chart.defaults.borderColor = '#E3DCCA';
+Chart.defaults.plugins.legend.display = false;
+Chart.defaults.plugins.tooltip.backgroundColor = '#1A1611';
+Chart.defaults.plugins.tooltip.titleColor = '#F6F3EC';
+Chart.defaults.plugins.tooltip.bodyColor = '#F6F3EC';
+Chart.defaults.plugins.tooltip.titleFont = { family: "ui-monospace, 'SF Mono', Menlo, Monaco, monospace", size: 10, weight: 'bold' };
+Chart.defaults.plugins.tooltip.bodyFont = { family: "ui-monospace, 'SF Mono', Menlo, Monaco, monospace", size: 11 };
+Chart.defaults.plugins.tooltip.padding = 10;
+Chart.defaults.plugins.tooltip.cornerRadius = 2;
+Chart.defaults.plugins.tooltip.displayColors = true;
+Chart.defaults.plugins.tooltip.boxPadding = 4;
+
+/* ---------- RNG & HELPERS ---------- */
+// Seeded PRNG for reproducible "random" data
+function mulberry32(seed) {
+  return function() {
+    let t = seed += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+const rng = mulberry32(42);
+
+function weighted(items, weights) {
+  const sum = weights.reduce((a,b)=>a+b, 0);
+  let r = rng() * sum;
+  for (let i = 0; i < items.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return items[i];
+  }
+  return items[items.length - 1];
+}
+const rand = () => rng();
+const randInt = (min, max) => Math.floor(min + rng() * (max - min + 1));
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+function median(arr) {
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a,b)=>a-b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 === 0 ? (s[m-1] + s[m]) / 2 : s[m];
+}
+function avg(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0) / arr.length : 0; }
+function sum(arr) { return arr.reduce((a,b)=>a+b,0); }
+function pct(num, den) { return den > 0 ? (num / den) : 0; }
+
+function fmtPct(v, digits = 1) { return (v * 100).toFixed(digits) + '%'; }
+function fmtInt(v) { return Math.round(v).toLocaleString('en-US'); }
+function fmtUsd(v) {
+  if (v >= 1000) return '$' + (v/1000).toFixed(v >= 10000 ? 0 : 1) + 'k';
+  return '$' + v.toFixed(2);
+}
+function fmtNum(v, digits = 1) {
+  if (Math.abs(v) >= 1000) return (v/1000).toFixed(1) + 'k';
+  return v.toFixed(digits);
+}
+function fmtDate(d) {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+function fmtDateIso(d) {
+  const yr = d.getFullYear();
+  const mo = String(d.getMonth()+1).padStart(2,'0');
+  const dy = String(d.getDate()).padStart(2,'0');
+  return `${yr}-${mo}-${dy}`;
+}
+
+/* ---------- DATA GENERATION ---------- */
+function generatePlayers(n) {
+  const players = [];
+  for (let i = 0; i < n; i++) {
+    const daysAgo = Math.floor(Math.pow(rng(), 0.7) * 42);
+    const install = new Date(TODAY.getTime() - daysAgo * DAY_MS);
+
+    const country_tier = weighted(COUNTRY_TIERS, [0.25, 0.30, 0.25, 0.20]);
+    const platform = weighted(PLATFORMS, [0.40, 0.60]);
+    const install_source = weighted(INSTALL_SOURCES, [0.45, 0.25, 0.18, 0.08, 0.04]);
+    const device_tier = weighted(DEVICE_TIERS, [0.28, 0.50, 0.22]);
+    const app_version = weighted(APP_VERSIONS, [0.55, 0.25, 0.12, 0.08]);
+
+    // A/B assignment
+    const testRoll = rng();
+    let test_name = null, test_bucket = null, testLift = 0;
+    let cum = 0;
+    for (const t of AB_TESTS) {
+      cum += t.share;
+      if (testRoll < cum) {
+        test_name = t.name;
+        const bIdx = Math.floor(rng() * t.buckets.length);
+        test_bucket = t.buckets[bIdx];
+        testLift = t.lift[test_bucket];
+        break;
+      }
+    }
+
+    // Quality score (affects downstream)
+    let q = 0.55;
+    if (country_tier === 'US')    q += 0.15;
+    if (country_tier === 'Tier1') q += 0.10;
+    if (country_tier === 'Tier3') q -= 0.06;
+    if (platform === 'iOS')       q += 0.06;
+    if (device_tier === 'high')   q += 0.10;
+    if (device_tier === 'low')    q -= 0.08;
+    if (install_source === 'suspicious') q -= 0.30;
+    if (install_source === 'unknown')    q -= 0.08;
+    q += testLift;
+    q += (rng() - 0.5) * 0.15;  // noise
+    q = clamp(q, 0.05, 0.98);
+
+    // FTUE
+    const ftue_completed = rng() < (0.40 + q * 0.45);
+    const ftue_step_reached = ftue_completed
+      ? 'completed'
+      : weighted(FTUE_STEPS_ORDER, [0.22,0.18,0.16,0.13,0.11,0.09,0.07,0.04]);
+
+    // Sessions & playtime
+    const sessions_d0_d6 = ftue_completed
+      ? Math.max(1, Math.floor(1 + rng() * 25 * q * 1.6))
+      : Math.max(1, Math.floor(1 + rng() * 4));
+    const avgLen = ftue_completed ? (8 + rng() * 22 * q) : (3 + rng() * 5);
+    const total_playtime_d0_d6 = Math.floor(sessions_d0_d6 * avgLen);
+    const avg_session_length = Math.max(1, Math.round(total_playtime_d0_d6 / sessions_d0_d6));
+
+    // Days active
+    const days_active_d0_d6 = Math.min(7, Math.max(1, 1 + Math.floor(rng() * 6.5 * q + 0.5)));
+
+    // Retention
+    const returned_d1 = daysAgo >= 2 && (ftue_completed ? rng() < (0.35 + q * 0.45) : rng() < 0.10);
+    const returned_d3 = daysAgo >= 4 && returned_d1 && rng() < (0.38 + q * 0.35);
+    const returned_d7 = daysAgo >= 8 && returned_d3 && rng() < (0.45 + q * 0.30);
+    const label_mature_d7 = daysAgo >= 8;
+
+    // Progression
+    const max_shop_level_d0_d6 = ftue_completed
+      ? Math.max(1, Math.floor(1 + rng() * 28 * q))
+      : Math.floor(rng() * 3);
+    const max_day_count_d0_d6 = Math.max(1, Math.floor(1 + rng() * 38 * q));
+    const manager_pass_tier_d0_d6 = ftue_completed ? Math.floor(rng() * 24 * q * q) : 0;
+    const season_pass_tier_d0_d6  = ftue_completed ? Math.floor(rng() * 36 * q * q) : 0;
+    const player_upgrades_tier_d0_d6 = ftue_completed ? Math.floor(rng() * 18 * q) : 0;
+
+    // Currencies
+    const currency_balance_cash_d0_d6 = Math.max(0, Math.floor(rng() * 42000 * q + 200));
+    const currency_balance_energy_d0_d6 = Math.max(0, Math.floor(rng() * 400 * q + 20));
+
+    // Cash sinks (some gated by progression)
+    const cash_spent_licenses_d0_d6 = ftue_completed ? Math.floor(rng() * 7500 * q) : 0;
+    const cash_spent_expansions_d0_d6 = max_shop_level_d0_d6 > 4 ? Math.floor(rng() * 14000 * q) : Math.floor(rng() * 500);
+    const cash_spent_storage_expansions_d0_d6 = Math.floor(rng() * 4500 * q);
+    const cash_spent_store_capacity_d0_d6 = Math.floor(rng() * 5500 * q);
+    const cash_spent_player_upgrades_d0_d6 = Math.floor(rng() * 3800 * q);
+    const cash_spent_customization = rng() < 0.45 ? Math.floor(rng() * 1400 * q) : 0;
+    const cash_spent_ems_d0_d6 = max_shop_level_d0_d6 > 9 ? Math.floor(rng() * 9500 * q) : 0;
+
+    // Energy sinks
+    const energy_spent_ems_d0_d6 = Math.floor(rng() * 95 * q);
+    const energy_spent_product_pricing_d0_d6 = Math.floor(rng() * 190 * q);
+    const energy_spent_order_speedup = Math.floor(rng() * 140 * q);
+    const energy_spent_services_licenses = Math.floor(rng() * 75 * q);
+
+    // Monetization
+    const iapBase = 0.022;
+    const iapBoost = (country_tier === 'US' ? 0.035 : country_tier === 'Tier1' ? 0.02 : 0)
+                   + (device_tier === 'high' ? 0.018 : 0)
+                   + testLift * 0.8;
+    const iap_probability = clamp(iapBase + q * 0.07 + iapBoost, 0, 0.4);
+    const iap_purchased = ftue_completed && rng() < iap_probability;
+    const iap_count_d0_d6 = iap_purchased ? Math.max(1, Math.floor(1 + rng() * rng() * 6)) : 0;
+    const iap_revenue_usd_d0_d6 = iap_count_d0_d6
+      ? Math.round((iap_count_d0_d6 * (2.99 + rng() * 28)) * 100) / 100
+      : 0;
+
+    const rewarded_ads_watched_d0_d6 = ftue_completed ? Math.floor(rng() * 42 * q) : 0;
+    // Interstitials: ~93-98% fill rate, scales with sessions
+    const inter_fill_chance = 0.92 + q * 0.06;
+    const interstitials_seen_d0_d6 = (rng() < inter_fill_chance)
+      ? Math.floor(sessions_d0_d6 * (1.8 + rng() * 3.2))
+      : 0;
+    // Banner impressions: ~88-96% fill rate, scales with sessions
+    const banner_fill_chance = 0.88 + q * 0.08;
+    const banner_impressions_d0_d6 = (rng() < banner_fill_chance)
+      ? Math.floor(sessions_d0_d6 * (3.5 + rng() * 6))
+      : 0;
+    const ad_revenue_usd_d0_d6 = Math.round(
+      (rewarded_ads_watched_d0_d6 * 0.018 + interstitials_seen_d0_d6 * 0.0045 + banner_impressions_d0_d6 * 0.0008) * 100
+    ) / 100;
+    const total_revenue_usd_d0_d6 = Math.round((iap_revenue_usd_d0_d6 + ad_revenue_usd_d0_d6) * 100) / 100;
+
+    // Per-day cumulative LTV arrays for days 0..15
+    // D0–D6 weights (front-loaded, sum = 1)
+    const d0d6Weights = [0.28, 0.20, 0.15, 0.12, 0.10, 0.08, 0.07];
+    const ltv_iap = [], ltv_ad = [];
+    let iapCum = 0, adCum = 0;
+    for (let d = 0; d <= 6; d++) {
+      iapCum += iap_revenue_usd_d0_d6 * d0d6Weights[d];
+      adCum  += ad_revenue_usd_d0_d6  * d0d6Weights[d];
+      ltv_iap.push(iapCum); ltv_ad.push(adCum);
+    }
+    // Extrapolate D7–D15: continue tapered revenue for retained players only
+    const iapD6 = iap_revenue_usd_d0_d6 * d0d6Weights[6];
+    const adD6  = ad_revenue_usd_d0_d6  * d0d6Weights[6];
+    for (let d = 7; d <= 15; d++) {
+      if (returned_d7) {
+        iapCum += iapD6 * Math.pow(0.85, d - 6) * (0.9 + rng() * 0.2);
+        adCum  += adD6  * Math.pow(0.88, d - 6) * (0.9 + rng() * 0.2);
+      }
+      ltv_iap.push(iapCum); ltv_ad.push(adCum);
+    }
+
+    players.push({
+      player_id: `p_${String(i).padStart(6,'0')}`,
+      install_date: install,
+      country_tier, platform, install_source, device_tier, app_version,
+      days_active_d0_d6, sessions_d0_d6, total_playtime_d0_d6, avg_session_length,
+      ftue_completed, ftue_step_reached,
+      max_shop_level_d0_d6, max_day_count_d0_d6,
+      manager_pass_tier_d0_d6, season_pass_tier_d0_d6, player_upgrades_tier_d0_d6,
+      currency_balance_cash_d0_d6, currency_balance_energy_d0_d6,
+      cash_spent_licenses_d0_d6, cash_spent_expansions_d0_d6, cash_spent_storage_expansions_d0_d6,
+      cash_spent_store_capacity_d0_d6, cash_spent_player_upgrades_d0_d6,
+      cash_spent_customization, cash_spent_ems_d0_d6,
+      energy_spent_ems_d0_d6, energy_spent_product_pricing_d0_d6,
+      energy_spent_order_speedup, energy_spent_services_licenses,
+      iap_purchased, iap_count_d0_d6, iap_revenue_usd_d0_d6,
+      rewarded_ads_watched_d0_d6, interstitials_seen_d0_d6, banner_impressions_d0_d6, ad_revenue_usd_d0_d6,
+      total_revenue_usd_d0_d6,
+      ltv_iap, ltv_ad,
+      test_name, test_bucket,
+      returned_d1, returned_d3, returned_d7, label_mature_d7,
+    });
+  }
+  return players;
+}
+
+const ALL_PLAYERS = generatePlayers(N_PLAYERS);
+
+/* ---------- FILTER STATE ---------- */
+const state = {
+  date_from: new Date(TODAY.getTime() - 30 * DAY_MS),
+  date_to: TODAY,
+  country_tier: new Set(COUNTRY_TIERS),
+  platform: new Set(PLATFORMS),
+  install_source: new Set(INSTALL_SOURCES.filter(s => s !== 'suspicious')),
+  device_tier: new Set(DEVICE_TIERS),
+  app_version: new Set(APP_VERSIONS),
+  ftue_completed: 'all',
+  iap_purchased: 'all',
+  test_name: null,
+  test_bucket: new Set(),
+};
+
+function applyFilters() {
+  return ALL_PLAYERS.filter(p => {
+    if (p.install_date < state.date_from) return false;
+    if (p.install_date > state.date_to) return false;
+    if (!state.country_tier.has(p.country_tier)) return false;
+    if (!state.platform.has(p.platform)) return false;
+    if (!state.install_source.has(p.install_source)) return false;
+    if (!state.device_tier.has(p.device_tier)) return false;
+    if (!state.app_version.has(p.app_version)) return false;
+    if (state.ftue_completed === 'yes' && !p.ftue_completed) return false;
+    if (state.ftue_completed === 'no' && p.ftue_completed) return false;
+    if (state.iap_purchased === 'yes' && !p.iap_purchased) return false;
+    if (state.iap_purchased === 'no' && p.iap_purchased) return false;
+    if (state.test_name && p.test_name !== state.test_name) return false;
+    if (state.test_name && state.test_bucket.size > 0 && !state.test_bucket.has(p.test_bucket)) return false;
+    return true;
+  });
+}
+
+/* ---------- COHORT-BASED FILTERS ---------- */
+function matureFor(players, days) {
+  const cutoff = TODAY.getTime() - days * DAY_MS + 1;
+  return players.filter(p => p.install_date.getTime() <= cutoff);
+}
+
+/* ---------- METRIC COMPUTATION ---------- */
+function compute(cohort) {
+  const m1 = matureFor(cohort, 2);
+  const m3 = matureFor(cohort, 4);
+  const m7 = cohort.filter(p => p.label_mature_d7);
+
+  const d1 = { n: m1.length, rate: pct(m1.filter(p=>p.returned_d1).length, m1.length) };
+  const d3 = { n: m3.length, rate: pct(m3.filter(p=>p.returned_d3).length, m3.length) };
+  const d7 = { n: m7.length, rate: pct(m7.filter(p=>p.returned_d7).length, m7.length) };
+
+  const playtimes = cohort.map(p => p.total_playtime_d0_d6);
+  const sessionLens = cohort.map(p => p.avg_session_length);
+
+  const ftue_rate = pct(cohort.filter(p=>p.ftue_completed).length, cohort.length);
+  const lvl10_rate = pct(cohort.filter(p => p.max_shop_level_d0_d6 >= 10).length, cohort.length);
+
+  const tiersMP = cohort.map(p=>p.manager_pass_tier_d0_d6);
+  const tiersSP = cohort.map(p=>p.season_pass_tier_d0_d6);
+  const tiersPU = cohort.map(p=>p.player_upgrades_tier_d0_d6);
+
+  const cashBal = cohort.map(p=>p.currency_balance_cash_d0_d6);
+  const energyBal = cohort.map(p=>p.currency_balance_energy_d0_d6);
+
+  const cashSinkTotals = {}; CASH_SINKS.forEach(s => cashSinkTotals[s.key] = sum(cohort.map(p=>p[s.key])));
+  const energySinkTotals = {}; ENERGY_SINKS.forEach(s => energySinkTotals[s.key] = sum(cohort.map(p=>p[s.key])));
+
+  // Monetization
+  const converters = cohort.filter(p=>p.iap_purchased);
+  const iapConvN = matureFor(cohort, 8);
+  const iapConv = pct(iapConvN.filter(p=>p.iap_purchased).length, iapConvN.length);
+  const iapRev = sum(cohort.map(p=>p.iap_revenue_usd_d0_d6));
+  const adRev  = sum(cohort.map(p=>p.ad_revenue_usd_d0_d6));
+  const totalRev = iapRev + adRev;
+
+  // Ad engagement rates
+  const rewardedRate = pct(cohort.filter(p=>p.rewarded_ads_watched_d0_d6 > 0).length, cohort.length);
+  const interRate = pct(cohort.filter(p=>p.interstitials_seen_d0_d6 > 0).length, cohort.length);
+  const bannerRate = pct(cohort.filter(p=>p.banner_impressions_d0_d6 > 0).length, cohort.length);
+
+  const mature7 = cohort.filter(p=>p.label_mature_d7);
+  const rev7 = sum(mature7.map(p=>p.total_revenue_usd_d0_d6));
+  const arpu = mature7.length ? rev7 / mature7.length : 0;
+  const arppu = converters.length ? iapRev / converters.length : 0;
+
+  // LTV curve by day-from-install (0..15)
+  // For each day D, include only players whose install_date is at least D days old.
+  const ltvCurve = [];
+  for (let d = 0; d <= 15; d++) {
+    const cutoff = TODAY.getTime() - d * DAY_MS + 1;
+    const eligible = cohort.filter(p => p.install_date.getTime() <= cutoff);
+    if (eligible.length === 0) {
+      ltvCurve.push({ day: d, iap: null, ad: null, total: null, n: 0 });
+      continue;
+    }
+    const iapSum = sum(eligible.map(p => p.ltv_iap[d]));
+    const adSum  = sum(eligible.map(p => p.ltv_ad[d]));
+    ltvCurve.push({
+      day: d,
+      iap: iapSum / eligible.length,
+      ad: adSum / eligible.length,
+      total: (iapSum + adSum) / eligible.length,
+      n: eligible.length
+    });
+  }
+
+  return {
+    n: cohort.length, matureN: m7.length,
+    d1, d3, d7,
+    playtime_median: median(playtimes),
+    playtime_avg: avg(playtimes),
+    session_avg: avg(sessionLens),
+    ftue_rate, ftue_complete_n: cohort.filter(p=>p.ftue_completed).length,
+    lvl10_rate,
+    tier_mp_median: median(tiersMP), tier_mp_avg: avg(tiersMP),
+    tier_sp_median: median(tiersSP), tier_sp_avg: avg(tiersSP),
+    tier_pu_median: median(tiersPU), tier_pu_avg: avg(tiersPU),
+    cash_median: median(cashBal), cash_avg: avg(cashBal),
+    energy_median: median(energyBal), energy_avg: avg(energyBal),
+    cash_sinks: cashSinkTotals,
+    cash_sink_total: sum(Object.values(cashSinkTotals)),
+    cash_avg_per_player: cohort.length ? sum(Object.values(cashSinkTotals)) / cohort.length : 0,
+    energy_sinks: energySinkTotals,
+    energy_sink_total: sum(Object.values(energySinkTotals)),
+    energy_avg_per_player: cohort.length ? sum(Object.values(energySinkTotals)) / cohort.length : 0,
+    iap_conv: iapConv, iap_conv_n: iapConvN.length,
+    iap_per_converter: converters.length ? avg(converters.map(p=>p.iap_count_d0_d6)) : 0,
+    iapRev, adRev, totalRev, arpu, arppu,
+    rewardedRate, interRate, bannerRate,
+    ltvCurve,
+    // Arrays for histograms etc
+    _playtimes: playtimes,
+    _sessionLens: sessionLens,
+    _ftue_steps: cohort.filter(p=>!p.ftue_completed).map(p=>p.ftue_step_reached),
+    _shop_levels: cohort.map(p=>p.max_shop_level_d0_d6),
+    _day_counts: cohort.map(p=>p.max_day_count_d0_d6),
+    _cohort: cohort,
+  };
+}
+
+/* ---------- HISTOGRAM BUILDER ---------- */
+function histogram(values, buckets) {
+  const counts = new Array(buckets.length).fill(0);
+  for (const v of values) {
+    for (let i = 0; i < buckets.length; i++) {
+      const [lo, hi, _label] = buckets[i];
+      if (v >= lo && (hi === Infinity ? true : v < hi)) { counts[i]++; break; }
+    }
+  }
+  return { labels: buckets.map(b => b[2]), counts };
+}
+
+/* ---------- CHART REGISTRY ---------- */
+const charts = {};
+function renderChart(id, type, data, options) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(el.getContext('2d'), { type, data, options: { responsive: true, maintainAspectRatio: false, ...options } });
+}
+
+/* ---------- TIME-SERIES AGGREGATION ---------- */
+function byInstallDate(cohort, keyFn, denFn = null) {
+  const map = new Map();
+  for (const p of cohort) {
+    const k = fmtDateIso(p.install_date);
+    if (!map.has(k)) map.set(k, { num: 0, den: 0, dates: p.install_date });
+    const slot = map.get(k);
+    slot.num += keyFn(p) ? 1 : 0;
+    slot.den += denFn ? (denFn(p) ? 1 : 0) : 1;
+  }
+  const sorted = [...map.entries()].sort((a,b) => a[0].localeCompare(b[0]));
+  return sorted.map(([k, v]) => ({ date: k, value: v.den ? v.num / v.den : 0, n: v.den }));
+}
+function sumByInstallDate(cohort, keyFn) {
+  const map = new Map();
+  for (const p of cohort) {
+    const k = fmtDateIso(p.install_date);
+    if (!map.has(k)) map.set(k, 0);
+    map.set(k, map.get(k) + keyFn(p));
+  }
+  return [...map.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([date, value]) => ({ date, value }));
+}
+
+/* =================================================================
+   RENDERING
+   ================================================================= */
+
+function renderCohortStrip(c) {
+  document.querySelector('#stat-n').innerHTML = `${fmtInt(c.n)}<span class="unit">players</span>`;
+  document.querySelector('#stat-range').textContent =
+    `${fmtDate(state.date_from)} → ${fmtDate(state.date_to)}`;
+  document.querySelector('#stat-mature').innerHTML = `${fmtInt(c.matureN)}<span class="unit">players</span>`;
+
+  // Count active non-default filters
+  let active = 0;
+  if (state.country_tier.size !== COUNTRY_TIERS.length) active++;
+  if (state.platform.size !== PLATFORMS.length) active++;
+  if (state.install_source.size !== INSTALL_SOURCES.filter(s=>s!=='suspicious').length
+      || [...state.install_source].some(s => !INSTALL_SOURCES.filter(x=>x!=='suspicious').includes(s))) active++;
+  if (state.device_tier.size !== DEVICE_TIERS.length) active++;
+  if (state.app_version.size !== APP_VERSIONS.length) active++;
+  if (state.ftue_completed !== 'all') active++;
+  if (state.iap_purchased !== 'all') active++;
+  if (state.test_name) active++;
+  document.querySelector('#stat-filters').textContent = active === 0 ? 'default' : `${active} active`;
+}
+
+function renderEngagement(c) {
+  // KPIs
+  updateKpi('#kpi-d1-ret', fmtPct(c.d1.rate));
+  document.querySelector('#kpi-d1-n').textContent = `N=${fmtInt(c.d1.n)}`;
+  updateKpi('#kpi-d3-ret', fmtPct(c.d3.rate));
+  document.querySelector('#kpi-d3-n').textContent = `N=${fmtInt(c.d3.n)}`;
+  updateKpi('#kpi-d7-ret', fmtPct(c.d7.rate));
+  document.querySelector('#kpi-d7-n').textContent = `N=${fmtInt(c.d7.n)}`;
+
+  updateKpiWithUnit('#kpi-playtime', fmtInt(c.playtime_median), 'min');
+  document.querySelector('#kpi-playtime .kpi-sub b').textContent = `${fmtInt(c.playtime_avg)} min`;
+
+  updateKpiWithUnit('#kpi-session', c.session_avg.toFixed(1), 'min');
+
+  // Retention trend
+  const m1 = matureFor(c._cohort, 2);
+  const m3 = matureFor(c._cohort, 4);
+  const m7 = c._cohort.filter(p => p.label_mature_d7);
+  const d1Series = byInstallDate(m1, p=>p.returned_d1);
+  const d3Series = byInstallDate(m3, p=>p.returned_d3);
+  const d7Series = byInstallDate(m7, p=>p.returned_d7);
+  const allDates = [...new Set([...d1Series, ...d3Series, ...d7Series].map(s=>s.date))].sort();
+  const alignTo = (series) => allDates.map(d => {
+    const s = series.find(x => x.date === d);
+    return s ? s.value * 100 : null;
+  });
+
+  renderChart('chart-retention', 'line', {
+    labels: allDates.map(d => {
+      const parts = d.split('-');
+      return `${parts[1]}/${parts[2]}`;
+    }),
+    datasets: [
+      { label: 'D1', data: alignTo(d1Series), borderColor: '#1E3A8A', backgroundColor: '#1E3A8A', borderWidth: 2, tension: 0.3, pointRadius: 0, pointHoverRadius: 5 },
+      { label: 'D3', data: alignTo(d3Series), borderColor: '#4F6FB8', backgroundColor: '#4F6FB8', borderWidth: 2, tension: 0.3, pointRadius: 0, pointHoverRadius: 5, borderDash: [4,2] },
+      { label: 'D7', data: alignTo(d7Series), borderColor: '#93A8CF', backgroundColor: '#93A8CF', borderWidth: 2, tension: 0.3, pointRadius: 0, pointHoverRadius: 5, borderDash: [1,2] },
+    ]
+  }, {
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: v => v + '%' }, grid: { color: '#E3DCCA' } },
+      x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 10 } }
+    },
+    plugins: {
+      legend: { display: true, position: 'top', align: 'end', labels: { font: { family: "ui-monospace, 'SF Mono', Menlo, monospace", size: 10 }, usePointStyle: true, pointStyle: 'line', padding: 14 } },
+      tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) + '%' : '—'}` } }
+    }
+  });
+
+  // Playtime histogram
+  const playtimeBuckets = [[0,15,'0–15'],[15,30,'15–30'],[30,60,'30–60'],[60,120,'1–2h'],[120,240,'2–4h'],[240,480,'4–8h'],[480,Infinity,'8h+']];
+  const hist = histogram(c._playtimes, playtimeBuckets);
+  renderChart('chart-playtime-hist', 'bar', {
+    labels: hist.labels,
+    datasets: [{
+      data: hist.counts, backgroundColor: '#1E3A8A', borderRadius: 2, categoryPercentage: 0.85, barPercentage: 0.95
+    }]
+  }, {
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#E3DCCA' }, ticks: { callback: v => fmtInt(v) } },
+      x: { grid: { display: false }, ticks: { font: { family: "ui-monospace, 'SF Mono', Menlo, monospace", size: 10 } } }
+    },
+    plugins: { tooltip: { callbacks: { label: ctx => `${fmtInt(ctx.parsed.y)} players` } } }
+  });
+}
+
+function renderProgression(c) {
+  updateKpi('#kpi-ftue', fmtPct(c.ftue_rate));
+  document.querySelector('#kpi-ftue .kpi-sub b').textContent = fmtInt(c.ftue_complete_n);
+  updateKpi('#kpi-lvl10', fmtPct(c.lvl10_rate));
+
+  // FTUE funnel
+  const stepCounts = FTUE_STEPS_ORDER.map(s => c._ftue_steps.filter(x => x === s).length);
+  renderChart('chart-ftue-funnel', 'bar', {
+    labels: FTUE_STEPS_ORDER,
+    datasets: [{ data: stepCounts, backgroundColor: '#5B21B6', borderRadius: 2 }]
+  }, {
+    indexAxis: 'y',
+    scales: {
+      x: { beginAtZero: true, grid: { color: '#E3DCCA' }, ticks: { callback: v => fmtInt(v) } },
+      y: { grid: { display: false }, ticks: { font: { family: "ui-monospace, 'SF Mono', Menlo, monospace", size: 10 } } }
+    },
+    plugins: { tooltip: { callbacks: { label: ctx => `${fmtInt(ctx.parsed.x)} dropped here` } } }
+  });
+
+  // Max shop level histogram
+  const lvlBuckets = [[0,1,'0'],[1,3,'1–2'],[3,6,'3–5'],[6,10,'6–9'],[10,15,'10–14'],[15,20,'15–19'],[20,30,'20–29'],[30,Infinity,'30+']];
+  const lvlHist = histogram(c._shop_levels, lvlBuckets);
+  renderChart('chart-level-hist', 'bar', {
+    labels: lvlHist.labels,
+    datasets: [{ data: lvlHist.counts, backgroundColor: '#5B21B6', borderRadius: 2 }]
+  }, {
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#E3DCCA' }, ticks: { callback: v => fmtInt(v) } },
+      x: { grid: { display: false }, ticks: { font: { family: "ui-monospace, 'SF Mono', Menlo, monospace", size: 10 } } }
+    },
+    plugins: { tooltip: { callbacks: { label: ctx => `${fmtInt(ctx.parsed.y)} players`, title: ctx => `Level ${ctx[0].label}` } } }
+  });
+
+  // Meta compare
+  renderChart('chart-meta-compare', 'bar', {
+    labels: ["Manager's Pass", 'Season Pass', 'Player Upgrades'],
+    datasets: [
+      { label: 'Median', data: [c.tier_mp_median, c.tier_sp_median, c.tier_pu_median], backgroundColor: '#5B21B6', borderRadius: 2 },
+      { label: 'Average', data: [c.tier_mp_avg, c.tier_sp_avg, c.tier_pu_avg], backgroundColor: '#A78BFA', borderRadius: 2 },
+    ]
+  }, {
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#E3DCCA' } },
+      x: { grid: { display: false } }
+    },
+    plugins: {
+      legend: { display: true, position: 'top', align: 'end', labels: { font: { family: "ui-monospace, 'SF Mono', Menlo, monospace", size: 10 }, usePointStyle: true, padding: 14 } },
+      tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}` } }
+    }
+  });
+
+  // Day count histogram
+  const dayBuckets = [[0,1,'0–1'],[1,3,'1–2'],[3,6,'3–5'],[6,10,'6–9'],[10,15,'10–14'],[15,25,'15–24'],[25,40,'25–39'],[40,Infinity,'40+']];
+  const dayHist = histogram(c._day_counts, dayBuckets);
+  renderChart('chart-daycount-hist', 'bar', {
+    labels: dayHist.labels,
+    datasets: [{ data: dayHist.counts, backgroundColor: '#7C3AED', borderRadius: 2 }]
+  }, {
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#E3DCCA' }, ticks: { callback: v => fmtInt(v) } },
+      x: { grid: { display: false }, ticks: { font: { family: "ui-monospace, 'SF Mono', Menlo, monospace", size: 10 } } }
+    },
+    plugins: { tooltip: { callbacks: { label: ctx => `${fmtInt(ctx.parsed.y)} players` } } }
+  });
+}
+
+function renderEconomy(c) {
+  updateKpi('#kpi-cash', fmtInt(c.cash_median));
+  document.querySelector('#kpi-cash .kpi-sub b').textContent = fmtInt(c.cash_avg);
+  updateKpi('#kpi-energy', fmtInt(c.energy_median));
+  document.querySelector('#kpi-energy .kpi-sub b').textContent = fmtInt(c.energy_avg);
+
+  updateKpi('#kpi-cashspent', fmtInt(c.cash_avg_per_player));
+  updateKpi('#kpi-energyspent', fmtInt(c.energy_avg_per_player));
+
+  // Cash sinks stacked bar
+  renderSinkChart('chart-cash-sinks', CASH_SINKS, c.cash_sinks, c.cash_sink_total, CASH_COLORS);
+  renderSinkTable('#table-cash-sinks', CASH_SINKS, c.cash_sinks, c.cash_sink_total, CASH_COLORS, c._cohort, 'cash');
+  document.querySelector('#cash-sinks-total').textContent = `total: ${fmtInt(c.cash_sink_total)}`;
+
+  renderSinkChart('chart-energy-sinks', ENERGY_SINKS, c.energy_sinks, c.energy_sink_total, ENERGY_COLORS);
+  renderSinkTable('#table-energy-sinks', ENERGY_SINKS, c.energy_sinks, c.energy_sink_total, ENERGY_COLORS, c._cohort, 'energy');
+  document.querySelector('#energy-sinks-total').textContent = `total: ${fmtInt(c.energy_sink_total)}`;
+}
+
+function renderSinkChart(chartId, sinks, totals, grandTotal, colors) {
+  const sorted = sinks.map((s, i) => ({ ...s, color: colors[i], value: totals[s.key] }))
+                       .sort((a,b) => b.value - a.value);
+  renderChart(chartId, 'bar', {
+    labels: ['share'],
+    datasets: sorted.map(s => ({
+      label: s.label,
+      data: [grandTotal ? (s.value / grandTotal) * 100 : 0],
+      backgroundColor: s.color,
+      borderRadius: 0,
+      barPercentage: 0.8,
+    }))
+  }, {
+    indexAxis: 'y',
+    scales: {
+      x: { stacked: true, beginAtZero: true, max: 100, grid: { color: '#E3DCCA' }, ticks: { callback: v => v + '%' } },
+      y: { stacked: true, display: false }
+    },
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { font: { family: "ui-monospace, 'SF Mono', Menlo, monospace", size: 10 }, boxWidth: 10, boxHeight: 10, padding: 8 } },
+      tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.x.toFixed(1)}%` } }
+    }
+  });
+}
+
+function renderSinkTable(selector, sinks, totals, grandTotal, colors, cohort, kind) {
+  const tbl = document.querySelector(selector);
+  const n = cohort.length || 1;
+  const rows = sinks.map((s, i) => {
+    const total = totals[s.key];
+    const avgPlayer = total / n;
+    const share = grandTotal ? total / grandTotal : 0;
+    const engagedN = cohort.filter(p => p[s.key] > 0).length;
+    const engagedPct = engagedN / n;
+    return { ...s, color: colors[i], total, avgPlayer, share, engagedPct };
+  }).sort((a,b) => b.total - a.total);
+
+  tbl.innerHTML = `
+    <thead>
+      <tr>
+        <th>Sink</th>
+        <th>Total</th>
+        <th>Avg/player</th>
+        <th>% share</th>
+        <th>% engaged</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map(r => `
+        <tr>
+          <td><span class="swatch" style="background:${r.color}"></span>${r.label}</td>
+          <td>${fmtInt(r.total)}</td>
+          <td>${fmtInt(r.avgPlayer)}</td>
+          <td>
+            ${(r.share * 100).toFixed(1)}%
+            <div class="bar-inline"><span style="width:${r.share*100}%; background:${r.color}"></span></div>
+          </td>
+          <td>${(r.engagedPct * 100).toFixed(1)}%</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
+
+function renderMonetization(c) {
+  updateKpi('#kpi-iap-conv', fmtPct(c.iap_conv, 2));
+  updateKpi('#kpi-iap-pp', c.iap_per_converter.toFixed(2));
+  updateKpi('#kpi-iap-rev', fmtUsd(c.iapRev));
+  updateKpi('#kpi-ad-rev', fmtUsd(c.adRev));
+  updateKpi('#kpi-total-rev', fmtUsd(c.totalRev));
+  const tr = document.querySelector('#kpi-total-rev .kpi-sub');
+  tr.children[0].querySelector('b').textContent = fmtUsd(c.iapRev);
+  tr.children[1].querySelector('b').textContent = fmtUsd(c.adRev);
+
+  updateKpi('#kpi-arpu', '$' + c.arpu.toFixed(3));
+  updateKpi('#kpi-arppu', '$' + c.arppu.toFixed(2));
+
+  // Ad engagement rates
+  updateKpi('#kpi-rewarded-rate', fmtPct(c.rewardedRate));
+  updateKpi('#kpi-inter-rate', fmtPct(c.interRate));
+  updateKpi('#kpi-banner-rate', fmtPct(c.bannerRate));
+
+  // LTV curve — 3 line series by day-from-install
+  const days = c.ltvCurve.map(p => p.day);
+  const totalLtv = c.ltvCurve.map(p => p.total);
+  const iapLtv = c.ltvCurve.map(p => p.iap);
+  const adLtv = c.ltvCurve.map(p => p.ad);
+
+  renderChart('chart-ltv', 'line', {
+    labels: days,
+    datasets: [
+      {
+        label: 'Total LTV',
+        data: totalLtv,
+        borderColor: '#22C55E', backgroundColor: '#22C55E',
+        borderWidth: 2.25, tension: 0.35, pointRadius: 0, pointHoverRadius: 5,
+        fill: false, spanGaps: false,
+      },
+      {
+        label: 'IAP LTV',
+        data: iapLtv,
+        borderColor: '#E11D48', backgroundColor: '#E11D48',
+        borderWidth: 2.25, tension: 0.35, pointRadius: 0, pointHoverRadius: 5,
+        fill: false, spanGaps: false,
+      },
+      {
+        label: 'Ad LTV',
+        data: adLtv,
+        borderColor: '#3B82F6', backgroundColor: '#3B82F6',
+        borderWidth: 2.25, tension: 0.35, pointRadius: 0, pointHoverRadius: 5,
+        fill: false, spanGaps: false,
+      },
+    ]
+  }, {
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: '#E3DCCA' },
+        ticks: { callback: v => '$' + (v < 1 ? v.toFixed(2) : v.toFixed(2)) },
+        title: { display: true, text: 'Cumulative USD / player', font: { size: 11 }, color: '#857C6A' }
+      },
+      x: {
+        grid: { color: '#F0EADC' },
+        title: { display: true, text: 'Day from install', font: { size: 11 }, color: '#857C6A' }
+      }
+    },
+    plugins: {
+      legend: {
+        display: true, position: 'bottom', align: 'center',
+        labels: {
+          font: { family: "ui-monospace, 'SF Mono', Menlo, monospace", size: 11 },
+          usePointStyle: true, pointStyle: 'line', padding: 18, boxWidth: 28,
+        }
+      },
+      tooltip: {
+        mode: 'index', intersect: false,
+        callbacks: {
+          title: ctx => `Day ${ctx[0].label} from install`,
+          label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y != null ? '$' + ctx.parsed.y.toFixed(4) : '—'}`,
+          afterBody: ctx => {
+            const day = parseInt(ctx[0].label);
+            const n = c.ltvCurve[day]?.n;
+            return n != null ? `\nN = ${fmtInt(n)} players` : '';
+          }
+        }
+      }
+    }
+  });
+}
+
+function updateKpi(selector, value) {
+  const el = document.querySelector(selector + ' .kpi-value');
+  if (el) {
+    // Preserve .unit child if present
+    const unit = el.querySelector('.unit');
+    el.firstChild.nodeValue = value;
+    if (unit) el.appendChild(unit);
+  }
+}
+function updateKpiWithUnit(selector, value, unit) {
+  const el = document.querySelector(selector + ' .kpi-value');
+  if (el) el.innerHTML = `${value}<span class="unit">${unit}</span>`;
+}
+
+/* ---------- A/B STRIP ---------- */
+function renderAbStrip(cohort) {
+  const strip = document.querySelector('#ab-strip');
+  if (!state.test_name) { strip.classList.remove('show'); return; }
+  strip.classList.add('show');
+
+  const testDef = AB_TESTS.find(t => t.name === state.test_name);
+  const buckets = testDef ? testDef.buckets : [...new Set(cohort.map(p => p.test_bucket))].sort();
+  const activeBuckets = state.test_bucket.size > 0 ? buckets.filter(b => state.test_bucket.has(b)) : buckets;
+
+  document.querySelector('#ab-test-label').textContent = state.test_name;
+  document.querySelector('#ab-test-meta').textContent = `${activeBuckets.length} bucket${activeBuckets.length === 1 ? '' : 's'} · N = ${fmtInt(cohort.length)}`;
+
+  // Build per-bucket metrics
+  const bucketData = activeBuckets.map(bucket => {
+    const bucketCohort = cohort.filter(p => p.test_bucket === bucket);
+    const m = compute(bucketCohort);
+    return { bucket, n: bucketCohort.length, m };
+  });
+
+  const controlIdx = activeBuckets.indexOf('control');
+  const controlData = controlIdx >= 0 ? bucketData[controlIdx] : null;
+
+  const metrics = [
+    { label: 'Cohort N',          fmt: (m, n) => fmtInt(n),                  val: (d) => d.n,                    raw: true },
+    { label: 'D1 Retention',      fmt: (m) => fmtPct(m.d1.rate),             val: (d) => d.m.d1.rate },
+    { label: 'D3 Retention',      fmt: (m) => fmtPct(m.d3.rate),             val: (d) => d.m.d3.rate },
+    { label: 'D7 Retention',      fmt: (m) => fmtPct(m.d7.rate),             val: (d) => d.m.d7.rate },
+    { label: 'FTUE Completion',   fmt: (m) => fmtPct(m.ftue_rate),           val: (d) => d.m.ftue_rate },
+    { label: 'IAP Conversion',    fmt: (m) => fmtPct(m.iap_conv, 2),         val: (d) => d.m.iap_conv },
+    { label: 'D7 ARPU',           fmt: (m) => '$' + m.arpu.toFixed(3),       val: (d) => d.m.arpu },
+    { label: 'Total Revenue',     fmt: (m) => fmtUsd(m.totalRev),            val: (d) => d.m.totalRev },
+  ];
+
+  const table = document.querySelector('#ab-table');
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Metric</th>
+        ${activeBuckets.map((b,i) => `<th class="${b === 'control' ? 'control-col' : ''}">${b}${b === 'control' ? ' · base' : ''}</th>`).join('')}
+      </tr>
+    </thead>
+    <tbody>
+      ${metrics.map(metric => `
+        <tr>
+          <td>${metric.label}</td>
+          ${bucketData.map((d, i) => {
+            const v = metric.val(d);
+            const display = metric.raw ? metric.fmt(d.m, d.n) : metric.fmt(d.m, d.n);
+            let delta = '';
+            if (controlData && d !== controlData && !metric.raw) {
+              const ctlV = metric.val(controlData);
+              if (ctlV > 0) {
+                const pctDelta = (v - ctlV) / ctlV * 100;
+                const cls = pctDelta > 0 ? 'pos' : pctDelta < 0 ? 'neg' : '';
+                delta = `<span class="delta ${cls}">${pctDelta >= 0 ? '+' : ''}${pctDelta.toFixed(1)}% vs ctl</span>`;
+              }
+            }
+            return `<td>${display}${delta}</td>`;
+          }).join('')}
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
+
+/* =================================================================
+   FILTER WIRING
+   ================================================================= */
+
+function initFilters() {
+  // Dates
+  const fFrom = document.querySelector('#f-date-from');
+  const fTo = document.querySelector('#f-date-to');
+  fFrom.value = fmtDateIso(state.date_from);
+  fTo.value = fmtDateIso(state.date_to);
+  fFrom.addEventListener('change', () => { state.date_from = new Date(fFrom.value); state.date_from.setHours(0,0,0,0); update(); });
+  fTo.addEventListener('change', () => { state.date_to = new Date(fTo.value); state.date_to.setHours(23,59,59,999); update(); });
+
+  // Multi-select dropdowns
+  setupMultiFilter('country_tier', COUNTRY_TIERS);
+  setupMultiFilter('platform', PLATFORMS);
+  setupMultiFilter('install_source', INSTALL_SOURCES);
+  setupMultiFilter('device_tier', DEVICE_TIERS);
+  setupMultiFilter('app_version', APP_VERSIONS);
+
+  // Segmented toggles
+  setupSegmented('#f-ftue', (val) => { state.ftue_completed = val; update(); });
+  setupSegmented('#f-iap', (val) => { state.iap_purchased = val; update(); });
+
+  // Test name (single)
+  setupSingleFilter('test_name', [null, ...AB_TESTS.map(t => t.name)], (val) => {
+    state.test_name = val;
+    state.test_bucket = new Set();
+    const bucketFilter = document.querySelector('[data-filter="test_bucket"]');
+    const bucketBtn = bucketFilter.querySelector('.filter-trigger');
+    if (val) {
+      const testDef = AB_TESTS.find(t => t.name === val);
+      setupMultiFilter('test_bucket', testDef.buckets);
+      bucketBtn.disabled = false;
+    } else {
+      bucketBtn.disabled = true;
+      bucketBtn.querySelector('.selection').textContent = '—';
+      bucketFilter.querySelector('.filter-panel').innerHTML = '';
+    }
+    update();
+  });
+
+  // Reset
+  document.querySelector('#reset-filters').addEventListener('click', resetFilters);
+
+  // Close dropdowns on outside click
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.filter-panel.open').forEach(panel => {
+      if (!panel.parentElement.contains(e.target)) {
+        panel.classList.remove('open');
+        panel.parentElement.querySelector('.filter-trigger').classList.remove('active');
+      }
+    });
+  });
+}
+
+function setupMultiFilter(key, options) {
+  const wrap = document.querySelector(`[data-filter="${key}"]`);
+  const btn = wrap.querySelector('.filter-trigger');
+  const panel = wrap.querySelector('.filter-panel');
+  const countsByVal = {};
+  options.forEach(o => countsByVal[o] = ALL_PLAYERS.filter(p => p[key] === o).length);
+
+  panel.innerHTML = options.map(opt => `
+    <label class="opt">
+      <input type="checkbox" data-val="${opt}" ${state[key].has(opt) ? 'checked' : ''}>
+      <span>${opt}</span>
+      <span class="count">${fmtInt(countsByVal[opt] || 0)}</span>
+    </label>
+  `).join('');
+
+  const update = () => {
+    panel.querySelectorAll('input').forEach(cb => {
+      const val = cb.getAttribute('data-val');
+      if (cb.checked) state[key].add(val); else state[key].delete(val);
+    });
+    updateMultiLabel(key, options);
+    triggerUpdate();
+  };
+
+  panel.querySelectorAll('input').forEach(cb => cb.addEventListener('change', update));
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('.filter-panel.open').forEach(p => { if (p !== panel) { p.classList.remove('open'); p.parentElement.querySelector('.filter-trigger').classList.remove('active'); }});
+    panel.classList.toggle('open');
+    btn.classList.toggle('active', panel.classList.contains('open'));
+  });
+
+  updateMultiLabel(key, options);
+}
+
+function updateMultiLabel(key, options) {
+  const wrap = document.querySelector(`[data-filter="${key}"]`);
+  const selEl = wrap.querySelector('.selection');
+  const selected = [...state[key]];
+  if (selected.length === 0) selEl.textContent = 'None';
+  else if (selected.length === options.length) selEl.textContent = 'All';
+  else if (selected.length === 1) selEl.textContent = selected[0];
+  else if (selected.length <= 2) selEl.textContent = selected.join(', ');
+  else selEl.textContent = `${selected.length} selected`;
+}
+
+function setupSingleFilter(key, options, callback) {
+  const wrap = document.querySelector(`[data-filter="${key}"]`);
+  const btn = wrap.querySelector('.filter-trigger');
+  const panel = wrap.querySelector('.filter-panel');
+
+  panel.innerHTML = options.map(opt => `
+    <label class="opt">
+      <input type="radio" name="${key}" data-val="${opt === null ? '' : opt}" ${(opt === null && state[key] === null) || opt === state[key] ? 'checked' : ''}>
+      <span>${opt === null ? '— none —' : opt}</span>
+    </label>
+  `).join('');
+
+  panel.querySelectorAll('input').forEach(rb => {
+    rb.addEventListener('change', () => {
+      const val = rb.getAttribute('data-val');
+      callback(val === '' ? null : val);
+      const label = val === '' ? '— none —' : val;
+      btn.querySelector('.selection').textContent = label;
+      panel.classList.remove('open');
+      btn.classList.remove('active');
+    });
+  });
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('.filter-panel.open').forEach(p => { if (p !== panel) { p.classList.remove('open'); p.parentElement.querySelector('.filter-trigger').classList.remove('active'); }});
+    panel.classList.toggle('open');
+    btn.classList.toggle('active', panel.classList.contains('open'));
+  });
+}
+
+function setupSegmented(selector, callback) {
+  const el = document.querySelector(selector);
+  el.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      el.querySelectorAll('button').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      callback(btn.getAttribute('data-val'));
+    });
+  });
+}
+
+let updateScheduled = false;
+function triggerUpdate() {
+  if (updateScheduled) return;
+  updateScheduled = true;
+  requestAnimationFrame(() => { updateScheduled = false; update(); });
+}
+
+function resetFilters() {
+  state.date_from = new Date(TODAY.getTime() - 30 * DAY_MS);
+  state.date_to = TODAY;
+  state.country_tier = new Set(COUNTRY_TIERS);
+  state.platform = new Set(PLATFORMS);
+  state.install_source = new Set(INSTALL_SOURCES.filter(s => s !== 'suspicious'));
+  state.device_tier = new Set(DEVICE_TIERS);
+  state.app_version = new Set(APP_VERSIONS);
+  state.ftue_completed = 'all';
+  state.iap_purchased = 'all';
+  state.test_name = null;
+  state.test_bucket = new Set();
+
+  document.querySelector('#f-date-from').value = fmtDateIso(state.date_from);
+  document.querySelector('#f-date-to').value = fmtDateIso(state.date_to);
+  ['country_tier','platform','install_source','device_tier','app_version'].forEach(k => {
+    const opts = { country_tier: COUNTRY_TIERS, platform: PLATFORMS, install_source: INSTALL_SOURCES, device_tier: DEVICE_TIERS, app_version: APP_VERSIONS }[k];
+    document.querySelectorAll(`[data-filter="${k}"] input[type=checkbox]`).forEach(cb => {
+      cb.checked = state[k].has(cb.getAttribute('data-val'));
+    });
+    updateMultiLabel(k, opts);
+  });
+  document.querySelectorAll('#f-ftue button, #f-iap button').forEach(b => {
+    b.classList.toggle('on', b.getAttribute('data-val') === 'all');
+  });
+  const testWrap = document.querySelector('[data-filter="test_name"]');
+  testWrap.querySelector('.selection').textContent = '— none —';
+  testWrap.querySelectorAll('input[type=radio]').forEach(rb => {
+    rb.checked = rb.getAttribute('data-val') === '';
+  });
+  const bucketWrap = document.querySelector('[data-filter="test_bucket"]');
+  bucketWrap.querySelector('.filter-trigger').disabled = true;
+  bucketWrap.querySelector('.selection').textContent = '—';
+  bucketWrap.querySelector('.filter-panel').innerHTML = '';
+
+  update();
+}
+
+/* ---------- MAIN UPDATE ---------- */
+function update() {
+  const cohort = applyFilters();
+  const c = compute(cohort);
+  renderCohortStrip(c);
+  renderAbStrip(cohort);
+  renderEngagement(c);
+  renderProgression(c);
+  renderEconomy(c);
+  renderMonetization(c);
+}
+
+/* ---------- INIT ---------- */
+initFilters();
+update();
+document.querySelector('#colophon-date').textContent = `Rendered ${new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}`;
+</script>
+</body>
+</html>

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blitz Sale — Is it cannibalizing our revenue?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+ --ink:#10151C;--ink2:#4A5462;--ink3:#8A8C86;--paper:#FAFAF8;--card:#FFF;--rule:#E3E1D9;
+ --evt:#1B5FA8;--evt-s:#E4EDF7;--ctl:#8A8C86;
+ --pos:#167A5B;--pos-s:#E3F1EC;--neg:#B03A2E;--neg-s:#F8E7E4;--amb:#9A6B12;--amb-s:#FBF0DC;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.w{max-width:980px;margin:0 auto;padding:0 28px 80px}
+h1,h2,h3{font-family:Archivo,sans-serif;letter-spacing:-.02em;margin:0}
+.mono,.n{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.top{padding:48px 0 18px;border-bottom:2px solid var(--ink)}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
+h1{font-size:44px;font-weight:700;line-height:1.05;margin:12px 0 10px;max-width:19ch}
+.sub{font-size:16px;color:var(--ink2);max-width:70ch;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:24px;padding:12px 0;border-bottom:1px solid var(--rule);font-size:12.5px;color:var(--ink3)}
+.meta b{color:var(--ink);font-weight:500}
+
+/* one-page findings */
+.summary{margin:30px 0 0;border:2px solid var(--ink);background:var(--card)}
+.summary .hd{background:var(--ink);color:#fff;padding:11px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+.summary table{margin:0;font-size:14.5px}
+.summary th{padding:10px 20px}
+.summary td{padding:13px 20px;border-bottom:1px solid #EDEBE4}
+.summary tr:last-child td{border-bottom:none}
+.summary .q{font-weight:600;color:var(--ink)}
+.summary .a{color:var(--ink2);font-size:14px}
+.qn{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink3);width:26px}
+
+.answer{background:var(--card);border:1px solid var(--rule);border-left:5px solid var(--pos);padding:26px 30px;margin:26px 0 0}
+.answer .lab{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--pos);margin-bottom:9px}
+.answer .big{font-family:Archivo,sans-serif;font-size:29px;font-weight:600;line-height:1.2;margin-bottom:14px}
+.answer p{margin:0 0 9px;font-size:15.5px;color:var(--ink2);max-width:72ch}
+.answer p:last-child{margin:0}
+
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-top:none;margin:0}
+.kpi div{background:var(--card);padding:17px}
+.kpi .k{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3)}
+.kpi .v{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;margin:5px 0 3px;line-height:1.1}
+.kpi .cap{font-size:12px;color:var(--ink2);line-height:1.4}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.evt{color:var(--evt)}
+
+section{margin-top:48px}
+.sh{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--ink);padding-bottom:7px;margin-bottom:14px}
+.sh h2{font-size:21px;font-weight:600}
+.sh span{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+p{max-width:76ch}
+figure{margin:20px 0 0}
+.box{background:var(--card);border:1px solid var(--rule);padding:18px 18px 10px}
+.box h3{font-size:14.5px;font-weight:600;margin:0 0 3px}
+.box .cap{margin:0 0 10px;font-size:12.5px;color:var(--ink3)}
+.lg{display:flex;flex-wrap:wrap;gap:15px;font-size:12px;color:var(--ink2);margin:0 0 10px}
+.lg i{width:11px;height:11px;border-radius:2px;display:inline-block;margin-right:6px;vertical-align:-1px}
+.cv{position:relative;height:262px}
+.take{font-size:15.5px;margin:12px 0 0;padding-left:14px;border-left:3px solid var(--evt);max-width:76ch}
+.take b{font-weight:600}
+
+table{width:100%;border-collapse:collapse;font-size:14px;margin:18px 0 0}
+th{font-family:Archivo,sans-serif;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);text-align:left;padding:9px 10px;border-bottom:1.5px solid var(--ink);font-weight:600}
+th.n,td.n{text-align:right}
+td{padding:9px 10px;border-bottom:1px solid #EDEBE4;vertical-align:top}
+td.n{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+tbody tr:hover td{background:#FCFCFA}
+tr.grp td{background:#F5F4EE;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-family:Archivo,sans-serif}
+tr.tot td{border-top:1.5px solid var(--ink);border-bottom:none;font-weight:600}
+.chip{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;white-space:nowrap}
+.c-pos{background:var(--pos-s);color:var(--pos)}.c-neg{background:var(--neg-s);color:var(--neg)}
+.c-neu{background:#F0EEE7;color:var(--ctl)}.c-gap{background:var(--amb-s);color:var(--amb)}
+.note{background:var(--amb-s);border-left:3px solid var(--amb);padding:14px 18px;font-size:14px;margin:20px 0 0;max-width:76ch}
+.note b{font-weight:600}
+ol.rec{counter-reset:r;list-style:none;padding:0;margin:14px 0 0}
+ol.rec li{counter-increment:r;position:relative;padding:0 0 15px 40px;font-size:15.5px;max-width:76ch}
+ol.rec li::before{content:counter(r,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--evt);font-weight:600}
+ol.rec b{font-weight:600}
+footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink3);max-width:none}
+@media(max-width:760px){.w{padding:0 16px 56px}h1{font-size:31px}.answer .big{font-size:22px}
+ .summary td,.summary th{padding-left:12px;padding-right:12px}}
+</style></head><body>
+<div class="w">
+
+<div class="top">
+<div class="eyebrow">Monetisation · Sample · iOS</div>
+<h1>Is Blitz Sale cannibalizing our IAP revenue?</h1>
+<p class="sub">The weekend offer earns about $3,181 a week. This report tests one thing: is that money new, or was it moved from the regular store?</p>
+</div>
+<div class="meta">
+<span><b>Before</b> 21 Apr – 22 May style="background:#1B5FA8"</span>
+<span><b>After</b> 5 Jun – 19 Jul style="background:#8A8C86"</span>
+<span><b>Revenue</b> net of 26% store fee</span>
+<span><b>Prepared</b> 22 Jul style="background:#8A8C86"</span>
+</div>
+
+<!-- ============ FINDINGS IN ONE PAGE ============ -->
+<div class="summary">
+<div class="hd">Findings in one page</div>
+<table>
+<thead><tr><th class="qn"></th><th>Question</th><th>Answer</th><th class="n">The number</th></tr></thead>
+<tbody>
+<tr><td class="qn">1</td><td class="q">Is Blitz Sale taking money from the regular store?</td>
+    <td class="a"><b class="pos">No — on iOS.</b> Regular revenue fell by the same amount on days the event runs and days it does not.</td>
+    <td class="n">−27.4% vs −29.1%</td></tr>
+<tr><td class="qn">2</td><td class="q">So is the event's revenue actually new?</td>
+    <td class="a"><b class="pos">Yes.</b> Total revenue on event days ran ahead of the control-day trend by almost exactly what Blitz Sale itself earned.</td>
+    <td class="n">+$27,081 added<br>vs $22,298 earned</td></tr>
+<tr><td class="qn">3</td><td class="q">Are its buyers existing customers?</td>
+    <td class="a"><b class="evt">Yes — almost all of them.</b> This is why the question was worth asking.</td>
+    <td class="n">69.8%<br>2,898 of 3,593</td></tr>
+<tr><td class="qn">4</td><td class="q">Did those existing customers then spend <i>less</i> on the regular store?</td>
+    <td class="a"><b class="pos">No.</b> Same players, 23 days either side of their first Blitz Sale purchase, against a matched control group who never bought it — both fell identically.</td>
+    <td class="n">−56.0% buyers<br>−57.6% control</td></tr>
+<tr><td class="qn">5</td><td class="q">Did conversion to the regular store drop on event days?</td>
+    <td class="a"><b class="pos">No.</b> With Blitz Sale stripped out entirely, weekend conversion held up <i>better</i> than weekdays.</td>
+    <td class="n">−13.2% weekend<br>−19.2% weekday</td></tr>
+<tr><td class="qn">6</td><td class="q">Do buyers spend it all on the weekend, then go quiet on weekdays?</td>
+    <td class="a"><b class="pos">No — the opposite.</b> Buyers are far more likely than similar non-buyers to also buy something on a weekday in the week that follows.</td>
+    <td class="n">~15% vs ~0.8%</td></tr>
+<tr><td class="qn">7</td><td class="q">Then why is revenue down?</td>
+    <td class="a"><b class="neg">A separate, business-wide decline.</b> Present on Tuesday, Wednesday and Thursday, where the event has never sold a unit. Not Blitz Sale.</td>
+    <td class="n">−25%<br>on all 7 days</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="answer">
+<div class="lab">Answer</div>
+<div class="big">No. There is no cannibalization. The event's revenue is additional.</div>
+<p>The event only sells Friday to Monday. Tuesday to Thursday it earns nothing, so those days act as a built-in control. Regular-store revenue per player fell by an <b>identical amount on both</b> — 27.4% on event days, 29.1% on control days.</p>
+<p>Its buyers are overwhelmingly existing customers (64.8%), but they did not cut back. Matched against a control group of non-buyers, their regular-store spend moved identically, and 42% of them buy a regular pack in the same weekend they buy the event. <b>They added it to the basket rather than swapping into it.</b></p>
+</div>
+
+<div class="kpi">
+<div><div class="k">Revenue displaced</div><div class="v neg">−$80</div><div class="cap">0.30% of Blitz Sale revenue · 0.03% of event-day regular revenue</div></div>
+<div><div class="k">Revenue added</div><div class="v pos">+$20,969</div><div class="cap">7 weeks, vs the control-day trend</div></div>
+<div><div class="k">Revenue added, weekly average</div><div class="v pos">+$3,364</div><div class="cap">7 weeks, iOS</div></div>
+<div><div class="k">Buyers already paying</div><div class="v evt">71.0%</div><div class="cap">against ~25% of the payer base</div></div>
+</div>
+
+<!-- ============ 1 ============ -->
+<section>
+<div class="sh"><h2>The test that answers the question</h2><span>Core evidence · iOS</span></div>
+<p>Blitz Sale sells Friday to Monday only. On Tuesday, Wednesday and Thursday it earns essentially nothing — $17 across seven weeks. Those three days are therefore a clean control group sitting inside our own data.</p>
+<p>The test: take regular-store revenue per active player and compare how far it fell on event days against control days, before launch versus after. Cannibalization would show up as a bigger fall on event days.</p>
+
+<figure><div class="box">
+<h3>Regular-store revenue per active player</h3>
+<p class="cap">Excludes Blitz Sale entirely · before 20 Apr–25 May, after 5 Jun–20 Jul</p>
+<div class="lg"><span><i style="background:#B9C7D6"></i>Before launch</span><span><i style="background:#1B5FA8"></i>After launch</span></div>
+<div class="cv"><canvas id="cDid"></canvas></div>
+</div>
+<p class="take">Both fell by the same amount — <b>−27.4% on event days, −29.1% on control days</b>. Event days did not fall further. Nothing was displaced.</p>
+</figure>
+
+<figure><div class="box">
+<h3>The two lines fall together, week by week</h3>
+<p class="cap">Regular-store revenue per active player, Friday–Thursday weeks</p>
+<div class="lg"><span><i style="background:#1B5FA8"></i>Event days (Fri–Mon)</span><span><i style="background:#8A8C86"></i>Control days (Tue–Thu)</span></div>
+<div class="cv"><canvas id="cTrend"></canvas></div>
+</div>
+<p class="take">Launch changes nothing about the relationship between the two lines. The gap was <b>1.046 before launch and 1.049 after</b> — unchanged to three decimal places.</p>
+</figure>
+
+<figure>
+<table>
+<thead><tr><th>Regular-store revenue on event days, iOS</th><th class="n">Amount</th></tr></thead>
+<tbody>
+<tr><td>Expected, if event days had followed the control-day decline</td><td class="n">$242,107</td></tr>
+<tr><td>Actual</td><td class="n">$234,783</td></tr>
+<tr class="tot"><td>Displaced by Blitz Sale</td><td class="n pos">−$85 &nbsp;<span class="chip c-pos">nil</span></td></tr>
+<tr><td>As a share of Blitz Sale revenue earned ($21,223)</td><td class="n">0.30%</td></tr>
+</tbody>
+</table>
+<p class="take">−$83 displaced against $21,234 the event earned — <b>0.30% of Blitz Sale's own revenue</b>, indistinguishable from zero. A separate day-by-day method returned $264 (1.0%). Both round to nothing.</p>
+</figure>
+</section>
+
+<!-- ============ 3 — EXISTING CUSTOMERS ============ -->
+<section>
+<div class="sh"><h2>Did it hurt existing customers?</h2><span>Buyer-level · iOS</span></div>
+<p>Yes, its buyers are existing customers — <b>71.0% had already paid for something before</b>, against roughly 25% across the payer base as a whole. That is precisely why cannibalization was the right question. If an offer sells almost entirely to people who already spend, the obvious risk is that it just redirects money they were going to spend anyway.</p>
+<p>Four tests, each looking at those buyers directly rather than at aggregate revenue.</p>
+
+<figure><div class="box">
+<h3>Test 1 · Same players, before and after their first Blitz Sale purchase</h3>
+<p class="cap">Regular-store spend, 25 days either side, against a matched control group who never bought the event</p>
+<div class="lg"><span><i style="background:#8A8C86"></i>Never bought Blitz Sale · 3,011 players</span><span><i style="background:#1B5FA8"></i>Blitz Sale buyers · 2,239 players</span></div>
+<div class="cv"><canvas id="cMatch"></canvas></div>
+</div>
+<p class="take">Regular-store spend fell <b>56.0% for buyers and 57.6% for the matched control</b>. The drop is an artefact of anchoring on a purchase date — it happens equally to players who never touched the event. If Blitz Sale were taking their money, the blue bar would be materially lower than the grey one. It is not.</p>
+</figure>
+
+<figure><div class="box">
+<h3>Test 2 · Conversion to the regular store, with Blitz Sale removed</h3>
+<p class="cap">Share of active players who bought a regular pack. Blitz Sale purchases excluded entirely.</p>
+<div class="lg"><span><i style="background:#1B5FA8"></i>Weekend, regular packs only</span><span><i style="background:#8A8C86"></i>Weekday</span></div>
+<div class="cv"><canvas id="cConvR"></canvas></div>
+</div>
+<p class="take">This is the direct answer to "did conversion drop for them". With the event stripped out, weekend conversion fell <b>13.2%</b> while weekdays fell <b>19.2%</b>. The weekend-to-weekday ratio <i>rose</i> from 0.99 to 1.06. Weekends are converting better than weekdays now than before launch — the opposite of what displacement looks like.</p>
+</figure>
+
+<figure><div class="box">
+<h3>Test 2b · Conversion, with Blitz Sale put back in</h3>
+<p class="cap">Share of active players who bought anything, including the event. Blitz Sale purchases included this time.</p>
+<div class="lg"><span><i style="background:#1B5FA8"></i>Weekend, total incl. Blitz Sale</span><span><i style="background:#8A8C86"></i>Weekday</span></div>
+<div class="cv"><canvas id="cConvTot"></canvas></div>
+</div>
+<p class="take">Weekday barely changes either way (−19.2% regular-only vs −18.1% total) — Blitz Sale sells almost nothing midweek. But weekend conversion is a different story: stripped of Blitz Sale it fell <b>13.2%</b>; with Blitz Sale counted, it only fell <b>9.8%</b>. That gap is Blitz Sale's own contribution — the event is propping the weekend number up, not eating into it.</p>
+</figure>
+
+<figure>
+<table>
+
+<thead><tr><th>Test 3 · How the event sits in a customer's wallet</th><th class="n">Result</th><th>Reading</th></tr></thead>
+<tbody>
+<tr><td>Buyers who also bought a regular pack the same weekend</td><td class="n">42%</td><td><span class="chip c-pos">bought alongside</span></td></tr>
+<tr><td>Blitz Sale as a share of total payer spend</td><td class="n">3.6%</td><td><span class="chip c-pos">small slice</span></td></tr>
+<tr><td>Regular-store spend per payer, all payers</td><td class="n">$6.48–$7.32</td><td><span class="chip c-neu">stable since launch</span></td></tr>
+<tr><td>Net revenue per Blitz Sale buyer</td><td class="n">$4.32–$4.46</td><td><span class="chip c-neu">flat for 7 weeks</span></td></tr>
+</tbody>
+</table>
+<p class="take">The event takes up under <b>4.5% of a paying customer's wallet</b> and most buyers pick it up in the same weekend they buy something else. An established payer's weekend basket now holds one more item than it used to; the rest of the basket is unchanged.</p>
+</figure>
+
+<figure>
+<table>
+<thead><tr><th>Test 4 · Do buyers keep spending on weekdays, or go quiet?</th><th class="n">Buyers</th><th class="n">Similar non-buyers</th></tr></thead>
+<tbody>
+<tr><td>Make a regular-store purchase on Tue, Wed or Thu in the week after their event purchase</td><td class="n">~15%</td><td class="n">~0.8%</td></tr>
+</tbody>
+</table>
+<p class="take">This is the direct test of "did they spend it all on the weekend and go quiet." They don't. Buyers are about <b>19x more likely</b> than a similar non-buyer to also purchase on a weekday in the following week. If anything, buying Blitz Sale marks someone as more likely to spend midweek, not less.</p>
+<p class="take" style="border-left-color:var(--ink3);color:var(--ink2);font-size:14px">Note: this measures buyers against a matched control, both <i>after</i> the purchase — it is not a before/after comparison, because per-player tracking only starts after full rollout (5 June). <b>Test 1 above is the true before/after</b> for this population: same buyers, 23 days before and after their own first purchase, total regular-store spend fell 56.0% against 57.6% for the matched control — identical. That test covers total spend, not the weekday portion specifically, since the underlying data is a single pre-aggregated figure rather than a daily breakdown.</p>
+</figure>
+
+<div class="note"><b>The one thing that did move.</b> Blitz Sale buyers made 47.4% fewer regular-store transactions after their first purchase, against 43.0% for the control — a 4-point gap. But their <i>spend</i> fell identically. Fewer, larger purchases, not less money. Worth a second look if it widens, but it does not change the revenue conclusion.</div>
+</section>
+
+<!-- ============ 4 — CONV / ARPPU ============ -->
+<section>
+<div class="sh"><h2>Conversion and ARPPU, before and after</h2><span>Requested metrics · iOS</span></div>
+<p>The headline monetisation metrics, split the same way. Read the control-day block alongside — it shows what was happening anyway.</p>
+
+<table>
+<thead><tr><th>Metric</th><th class="n">Before</th><th class="n">After</th><th class="n">Change</th><th>Reading</th></tr></thead>
+<tbody>
+<tr class="grp"><td colspan="5">Event days · Friday to Monday</td></tr>
+<tr><td>Conversion to pay</td><td class="n">0.849%</td><td class="n">0.808%</td><td class="n neg">−4.8%</td><td><span class="chip c-pos">held up</span></td></tr>
+<tr><td>ARPPU — all products</td><td class="n">$5.75</td><td class="n">$4.61</td><td class="n neg">−19.8%</td><td><span class="chip c-neu">mix effect</span></td></tr>
+<tr><td>ARPPU — regular store only</td><td class="n">$5.82</td><td class="n">$4.62</td><td class="n neg">−20.6%</td><td><span class="chip c-neu">mix effect</span></td></tr>
+<tr><td><b>Revenue per active player — regular store</b></td><td class="n">$0.0759</td><td class="n">$0.0551</td><td class="n neg">−27.4%</td><td><span class="chip c-pos">matches control</span></td></tr>
+<tr><td><b>Revenue per active player — total</b></td><td class="n">$0.0759</td><td class="n">$0.0560</td><td class="n neg">−26.2%</td><td><span class="chip c-pos">beats control</span></td></tr>
+
+<tr class="grp"><td colspan="5">Control days · Tuesday to Thursday</td></tr>
+<tr><td>Conversion to pay</td><td class="n">0.904%</td><td class="n">0.736%</td><td class="n neg">−18.6%</td><td><span class="chip c-neg">falling faster</span></td></tr>
+<tr><td>ARPPU — all products</td><td class="n">$5.64</td><td class="n">$4.96</td><td class="n neg">−12.1%</td><td><span class="chip c-neu">—</span></td></tr>
+<tr><td>ARPPU — regular store only</td><td class="n">$5.81</td><td class="n">$4.73</td><td class="n neg">−18.6%</td><td><span class="chip c-neu">—</span></td></tr>
+<tr><td><b>Revenue per active player — regular store</b></td><td class="n">$0.0653</td><td class="n">$0.0463</td><td class="n neg">−29.1%</td><td><span class="chip c-neg">the real problem</span></td></tr>
+<tr><td><b>Revenue per active player — total</b></td><td class="n">$0.0653</td><td class="n">$0.0463</td><td class="n neg">−29.1%</td><td><span class="chip c-neg">the real problem</span></td></tr>
+</tbody>
+</table>
+
+<div class="note"><b>Why ARPPU looks worse on event days — and why it is not a problem.</b> ARPPU is revenue divided by payers. On event days the event pulled in extra payers who spend small amounts, so the divisor grew and the average per payer fell. Multiply conversion by ARPPU and you get revenue per active player, which is the number that actually matters — and on that measure event days beat control days by 2.9 percentage points. Conversion up, ARPPU down, revenue up. That is a wider payer base, not a weaker one.</div>
+
+<figure><div class="box">
+<h3>Conversion to pay, week by week</h3>
+<p class="cap">Payers as a share of active players</p>
+<div class="lg"><span><i style="background:#1B5FA8"></i>Event days (Fri–Mon)</span><span><i style="background:#8A8C86"></i>Control days (Tue–Thu)</span></div>
+<div class="cv"><canvas id="cConv"></canvas></div>
+</div>
+<p class="take">Before launch the two ran together. After launch <b>event-day conversion separated upward</b> and has stayed there.</p>
+</figure>
+
+<figure><div class="box">
+<h3>Total revenue on event days against the control-day trend</h3>
+<p class="cap">7 weeks after launch, iOS, net USD</p>
+<div class="cv" style="height:200px"><canvas id="cInc"></canvas></div>
+</div>
+<p class="take">Event days earned <b>$27,081 more</b> than the control-day decline predicted. Blitz Sale itself earned $22,298. The two are in the same range, which is what "fully incremental" looks like.</p>
+</figure>
+</section>
+
+<!-- ============ 5 — WEEKDAY REVENUE ============ -->
+<section>
+<div class="sh"><h2>Revenue by day of week</h2><span>Supporting evidence · iOS</span></div>
+<p>If Blitz Sale were pulling money out of the regular store, the regular store should earn less on the days the event runs. It does the opposite.</p>
+
+<figure><div class="box">
+<h3>Average daily revenue by day of week</h3>
+<p class="cap">Since rollout, net USD, iOS</p>
+<div class="lg"><span><i style="background:#8A8C86"></i>Regular store</span><span><i style="background:#1B5FA8"></i>Blitz Sale</span></div>
+<div class="cv"><canvas id="cWday"></canvas></div>
+</div>
+<p class="take">The regular store earns <b>more</b> on Saturday and Sunday ($9,936 and $10,380) than on any control day ($8,739–$9,641). Blitz Sale stacks on top of the strongest part of the week rather than hollowing it out.</p>
+</figure>
+</section>
+
+<!-- ============ 6 — THE REAL DECLINE ============ -->
+<section>
+<div class="sh"><h2>What is actually falling</h2><span>Separate issue</span></div>
+<p>The 27% drop that triggered this investigation is real, but it is business-wide. It is present on Tuesday, Wednesday and Thursday, where Blitz Sale has never sold a single unit. It started before the event scaled and has continued through it.</p>
+
+<figure><div class="box">
+<h3>Store conversion is falling. Conversion into Blitz Sale is not.</h3>
+<p class="cap">Per event weekend, iOS. Final partial week excluded.</p>
+<div class="lg"><span><i style="background:#B03A2E"></i>Active players → any purchase</span><span><i style="background:#167A5B"></i>Payers → Blitz Sale</span></div>
+<div class="cv"><canvas id="cFunnel"></canvas></div>
+</div>
+<p class="take">The store's active-to-payer rate fell from <b>4.40% to 2.57%</b>. Over the same weeks the share of payers buying Blitz Sale <b>held between 6.16% and 6.60%</b>, and net revenue per buyer stayed flat at $3.86–$4.52. The offer is holding its ground while the store around it weakens.</p>
+</figure>
+
+<p style="margin-top:18px">This points at acquisition quality, pricing, or the regular catalogue — not at the weekend offer. It needs a separate investigation, and removing Blitz Sale would not touch it.</p>
+</section>
+
+<!-- ============ 7 — AUDIENCE ============ -->
+<section>
+<div class="sh"><h2>Who buys it, and how big it can get</h2><span>Context</span></div>
+<p>The event is small and sells to people who already pay. That is why the cannibalization question mattered — and it is also the main constraint on the upside.</p>
+
+<div class="kpi" style="border-top:1px solid var(--rule);margin-top:16px">
+<div><div class="k">Buyers already paying</div><div class="v evt">69.4%</div><div class="cap">2,812 of 4,052 buyers</div></div>
+<div><div class="k">Reach</div><div class="v">0.09%</div><div class="cap">of weekly active players</div></div>
+<div><div class="k">Buy exactly once</div><div class="v">65.3%</div><div class="cap">2,827 of 3,215 buyers</div></div>
+<div><div class="k">Share of iOS revenue, all 7 days</div><div class="v">4.0%</div><div class="cap">$19,896 of $439,298</div></div>
+</div>
+
+<figure><div class="box">
+<h3>Blitz Sale share of weekend revenue</h3>
+<p class="cap">Saturday + Sunday only, as a share of total IAP revenue those two days · iOS</p>
+<div class="cv"><canvas id="cWkndShare"></canvas></div>
+</div>
+<p class="take">Before launch, trace amounts of Blitz Sale made up <b>0.3% of weekend revenue</b>. Since full rollout it has held between <b>8% and 12%</b>, averaging <b>10.1%</b> — roughly one dollar in ten spent on a weekend now goes to the event. On the four-day event window (Fri–Mon), which includes two lighter selling days, the share averages 5.8%.</p>
+</figure>
+
+<p style="margin-top:20px">About 565 players buy it each weekend, each spending roughly $4.16, and that figure has not moved in seven weeks. The ceiling is reach, not appetite — and reach is the one thing we currently cannot measure.</p>
+
+<figure>
+<table>
+<thead><tr><th>Individual product, weekly average revenue</th><th class="n">Before</th><th class="n">After</th><th class="n">Change</th></tr></thead>
+<tbody>
+<tr><td>Elite Director Pass</td><td class="n">$4,512</td><td class="n">$2,183</td><td class="n neg">−51.6%</td></tr>
+<tr><td>Director Pass Pro</td><td class="n">$6,83</td><td class="n">$2,781</td><td class="n neg">−59.3%</td></tr>
+<tr><td>$6,398 Tokens Bundle</td><td class="n">$4,333</td><td class="n">$2,199</td><td class="n neg">−49.3%</td></tr>
+<tr><td>$2,327 Tokens Bundle</td><td class="n">$7,60</td><td class="n">$3,199</td><td class="n neg">−57.9%</td></tr>
+<tr><td>$15,214 Tokens Bundle</td><td class="n">$5,32</td><td class="n">$2,499</td><td class="n neg">−53.0%</td></tr>
+<tr><td>Rookie Pack</td><td class="n">$7,592</td><td class="n">$4,248</td><td class="n neg">−44.0%</td></tr>
+<tr><td>Director Pass Pro + Elite</td><td class="n">$8,905</td><td class="n">$6,169</td><td class="n neg">−30.7%</td></tr>
+<tr><td>Silence Ads All</td><td class="n">$12,097</td><td class="n">$7,225</td><td class="n neg">−40.3%</td></tr>
+<tr><td>$846 Tokens Bundle</td><td class="n">$3,301</td><td class="n">$1,727</td><td class="n neg">−47.7%</td></tr>
+<tr><td>$80 Tokens Bundle</td><td class="n">$641</td><td class="n">$363</td><td class="n neg">−43.4%</td></tr>
+<tr><td>$420 Tokens Bundle</td><td class="n">$2,719</td><td class="n">$1,520</td><td class="n neg">−33.9%</td></tr>
+<tr><td>8,196 Sparks Bundle</td><td class="n">$677</td><td class="n">$365</td><td class="n neg">−34.6%</td></tr>
+<tr><td>415 Sparks Bundle</td><td class="n">$6,517</td><td class="n">$4,235</td><td class="n neg">−26.2%</td></tr>
+<tr><td>3,758 Sparks Bundle</td><td class="n">$770</td><td class="n">$657</td><td class="n neg">−31.4%</td></tr>
+<tr><td>1,699 Sparks Bundle</td><td class="n">$1,643</td><td class="n">$1,119</td><td class="n neg">−21.9%</td></tr>
+<tr><td>710 Sparks Bundle V2</td><td class="n">$5,582</td><td class="n">$4,132</td><td class="n neg">−27.7%</td></tr>
+<tr><td>84 Sparks Bundle</td><td class="n">$3,392</td><td class="n">$2,450</td><td class="n neg">−22.3%</td></tr>
+</tbody>
+</table>
+<p class="take">Checked at the individual product level too. Every core regular-store product declined in a tight band of <b>−21.9% to −59.3%</b>, averaging −39.8% — in line with the business-wide trend already established. None fell further than the rest, which is what you'd expect if one specific product were being substituted for Blitz Sale. Passes and token bundles fell hardest; spark bundles fell more mildly — a product-tier pattern, not a Blitz Sale signature. (Three seasonal or newly-scaling items — Frostfall Pass 2026, Deluxe Bundle, and the Momentum Offers family — are excluded here as they move for reasons unrelated to Blitz Sale.)</p>
+</figure>
+</section>
+
+<!-- ============ ENGAGEMENT ============ -->
+<section>
+<div class="sh"><h2>Blitz Sale engagement</h2><span>Interaction data</span></div>
+<p>Revenue aside, does buying Blitz Sale change how much someone actually plays? Two cuts: buyers against a matched control in the week after their purchase, and general interaction on event days against non-event days across the whole player base.</p>
+
+<figure><div class="box">
+<h3>Retention, D0 to D7</h3>
+<p class="cap">Share of the cohort still active each day after their purchase (or matched pseudo-purchase for control)</p>
+<div class="lg"><span><i style="background:#1B5FA8"></i>Blitz Sale buyers</span><span><i style="background:#8A8C86"></i>Matched control</span></div>
+<div class="cv"><canvas id="cRetain"></canvas></div>
+</div>
+<p class="take">Buyers retain far better — <b>23.0% at D7 against 9.5%</b> for the matched control, a 2.4x gap. Some of this gap is selection (buyers were already more engaged before they bought), but the size of it is real.</p>
+</figure>
+
+<figure><div class="box">
+<h3>Median daily playtime, D0 to D7</h3>
+<p class="cap">Seconds played per active day, buyers vs matched control</p>
+<div class="lg"><span><i style="background:#1B5FA8"></i>Blitz Sale buyers</span><span><i style="background:#8A8C86"></i>Matched control</span></div>
+<div class="cv"><canvas id="cPlaytime"></canvas></div>
+</div>
+<p class="take">Buyers play roughly <b>2x longer per active day</b> than the matched control, every day in the window. Purchase day itself (D0) is the peak at 7,771 seconds (~2.2 hours), settling to a still-elevated 4,956–6,802 seconds across the rest of the window.</p>
+</figure>
+
+<figure>
+<table>
+<thead><tr><th>Interaction, event days vs non-event days</th><th class="n">Event days</th><th class="n">Non-event days</th><th class="n">Difference</th></tr></thead>
+<tbody>
+<tr><td>Rewarded ads watched, per active player</td><td class="n">2.38</td><td class="n">2.11</td><td class="n pos">+12.9%</td></tr>
+</tbody>
+</table>
+<p class="take">Rewarded ad views run <b>12.9% higher on event days</b> — the same direction as every other engagement and revenue measure already shown. Players are watching more ads, not fewer, on the days the event runs.</p>
+</figure>
+
+<figure><div class="box">
+<h3>The retention advantage narrows at higher shop levels</h3>
+<p class="cap">D7 retention, Blitz Sale buyers vs matched control, by shop level at time of purchase</p>
+<div class="lg"><span><i style="background:#1B5FA8"></i>Blitz Sale buyers</span><span><i style="background:#8A8C86"></i>Matched control</span></div>
+<div class="cv"><canvas id="cLevelRet"></canvas></div>
+</div>
+<p class="take">At levels 6–8, buyers retain at <b>2.3x</b> the control rate (22.7% vs 9.7%). By levels 23–27 that gap shrinks to <b>1.4x</b> (24.2% vs 16.9%). Non-Deluxe spend by these buyers follows the same slope — $14.40 cumulative at low levels down to $7.89 at high levels — suggesting the event's engagement lift is most valuable earlier in a player's progression, where the regular catalogue still has less to offer.</p>
+</figure>
+
+<figure><div class="box">
+<h3>Buyer conversion to pay, weekday vs weekend</h3>
+<p class="cap">D1–D7 after purchase, regular-store conversion, split by the actual calendar day it fell on</p>
+<div class="lg"><span><i style="background:#1B5FA8"></i>Blitz Sale buyers</span><span><i style="background:#8A8C86"></i>Matched control</span></div>
+<div class="cv"><canvas id="cWkdyEngage"></canvas></div>
+</div>
+<p class="take">For the matched control, weekends run slightly <b>quieter</b> than weekdays — a normal pattern. For Blitz Sale buyers it flips: conversion rises from 5.6% on weekdays to 11.4% on weekends. Buyers behave like a different population on weekends than everyone else does.</p>
+</figure>
+
+<figure>
+<table>
+<thead><tr><th>Buyer engagement, weekday vs weekend</th><th class="n">Weekday</th><th class="n">Weekend</th></tr></thead>
+<tbody>
+<tr class="grp"><td colspan="3">Blitz Sale buyers, D1–D7 after purchase</td></tr>
+<tr><td>Retention</td><td class="n">25.9%</td><td class="n">27.0%</td></tr>
+<tr><td>Regular-store conversion</td><td class="n">5.6%</td><td class="n">11.4%</td></tr>
+<tr><td>Median daily playtime</td><td class="n">91 min</td><td class="n">115 min</td></tr>
+<tr class="grp"><td colspan="3">Matched control, same window</td></tr>
+<tr><td>Retention</td><td class="n">14.6%</td><td class="n">14.6%</td></tr>
+<tr><td>Regular-store conversion</td><td class="n">0.33%</td><td class="n">0.32%</td></tr>
+<tr><td>Median daily playtime</td><td class="n">49 min</td><td class="n">57 min</td></tr>
+</tbody>
+</table>
+<p class="take">Retention is roughly flat for buyers across weekday/weekend, and drifts slightly down for the control. Playtime rises on weekends for both groups — an ordinary weekend effect — but conversion is where buyers and control genuinely diverge.</p>
+</figure>
+</section>
+
+<footer>
+Revenue is net of the 27% store fee and limited to verified transactions. "Regular store" means every product except Blitz Sale. Before and after windows use whole Friday–Thursday weeks so each weekday appears an equal number of times; the transition week 26 May – 4 Jun and the partial final week from 18 Jul are excluded throughout. Event days are Friday to Monday; control days are Tuesday to Thursday, on which Blitz Sale earned $17 across the full post-launch period. Displacement and incremental revenue are difference-in-differences estimates against the control-day trend. Matched before/after covers 2,239 buyers against 2,743 control players.
+</footer>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const INK='#10151C',INK2='#4A5462',INK3='#8A8C86',RULE='#E3E1D9',EVT='#1B5FA8',EVTL='#B9C7D6',
+      CTL='#8A8C86',POS='#167A5B',NEG='#B03A2E';
+Chart.defaults.font.family="Inter, system-ui, sans-serif";
+Chart.defaults.font.size=12; Chart.defaults.color=INK2;
+const noLeg={legend:{display:false}};
+const gx={grid:{display:false},border:{color:RULE},ticks:{color:INK3}};
+const gy=(cb)=>({grid:{color:'#F0EFE9'},border:{display:false},ticks:{color:INK3,callback:cb}});
+const mk=(id,cfg,plugins)=>new Chart(document.getElementById(id),Object.assign(cfg,{plugins:plugins||[]}));
+const MONO="'IBM Plex Mono', monospace";
+
+/* --- 1. DiD --- */
+mk('cDid',{type:'bar',data:{labels:['Event days  (Fri–Mon)','Control days  (Tue–Thu)'],
+ datasets:[{label:'Before',data:[0.0759,0.0653],backgroundColor:EVTL,barPercentage:.66,categoryPercentage:.6},
+           {label:'After',data:[0.0551,0.0463],backgroundColor:EVT,barPercentage:.66,categoryPercentage:.6}]},
+ options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:16}},
+  plugins:{...noLeg,tooltip:{callbacks:{label:c=>c.dataset.label+': $'+c.parsed.y.toFixed(4)}}},
+  scales:{x:{...gx,ticks:{color:INK,font:{size:12.5,weight:'500'}}},y:{...gy(v=>'$'+v.toFixed(2)),beginAtZero:true}}}},
+ [{id:'a',afterDatasetsDraw(c){const x=c.ctx;x.save();x.font="500 12px "+MONO;x.textAlign='center';
+   c.data.datasets.forEach((ds,di)=>c.getDatasetMeta(di).data.forEach((el,i)=>{x.fillStyle=di?EVT:INK3;
+     x.fillText('$'+ds.data[i].toFixed(4),el.x,el.y-7);}));
+   x.font="600 13px "+MONO;x.fillStyle=NEG;const m=c.getDatasetMeta(1).data;
+   x.fillText('−27.4%',m[0].x,c.chartArea.bottom-14);x.fillText('−29.1%',m[1].x,c.chartArea.bottom-14);
+   x.restore();}}]);
+
+/* --- 2. Parallel trend + 3. Conversion --- */
+const wk=['Apr 24','May 1','May 8','May 15','May 22','May 29','Jun 5','Jun 12','Jun 19','Jun 26','Jul 3','Jul 10','Jul 17'];
+const launch={id:'lx',beforeDatasetsDraw(c){const x=c.ctx,y=c.chartArea,px=c.scales.x.getPixelForValue(6);
+  x.save();x.strokeStyle='#C7C4B8';x.setLineDash([4,4]);x.lineWidth=1;x.beginPath();x.moveTo(px,y.top);x.lineTo(px,y.bottom);x.stroke();
+  x.setLineDash([]);x.fillStyle=INK3;x.font="500 10.5px "+MONO;x.textAlign='left';x.fillText('FULL ROLLOUT',px+6,y.top+12);x.restore();}};
+const lineOpt=(fmt,min)=>({responsive:true,maintainAspectRatio:false,
+  plugins:{...noLeg,tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},
+  scales:{x:gx,y:{...gy(v=>fmt(v)),suggestedMin:min}}});
+mk('cTrend',{type:'line',data:{labels:wk,datasets:[
+ {label:'Event days',data:[.7265,.6768,.9293,.7823,.7857,.4802,.5118,.4923,.4263,.5635,.4777,.4485,.4844],borderColor:EVT,backgroundColor:EVT,tension:.3,borderWidth:2.4,pointRadius:2.6},
+ {label:'Control days',data:[.7154,.7688,.8669,.7113,.5649,.5628,.4741,.4701,.4266,.5340,.4309,.4293,.4814],borderColor:CTL,backgroundColor:CTL,tension:.3,borderWidth:2.4,pointRadius:2.6,borderDash:[4,2]}]},
+ options:lineOpt(v=>'$'+v.toFixed(v<0.1?4:2),0.04)},[launch]);
+mk('cConv',{type:'line',data:{labels:wk,datasets:[
+ {label:'Event days',data:[0.7782,0.7392,1.0917,1.0819,0.9441,0.8371,1.3519,0.9913,0.8228,0.8405,0.8627,0.7694,0.6890],borderColor:EVT,backgroundColor:EVT,tension:.3,borderWidth:2.4,pointRadius:2.6},
+ {label:'Control days',data:[0.8667,0.9167,1.0823,0.9884,0.9021,1.1227,1.2505,0.7982,0.7260,0.7660,0.8079,0.6948,0.7078],borderColor:CTL,backgroundColor:CTL,tension:.3,borderWidth:2.4,pointRadius:2.6,borderDash:[5,2]}]},
+ options:lineOpt(v=>v.toFixed(v<10?2:1)+'%',0.7)},[launch]);
+
+/* --- 5. Matched before/after --- */
+mk('cMatch',{type:'bar',data:{labels:['Regular-store spend','Regular-store transactions'],
+ datasets:[{label:'Never bought Blitz Sale',data:[-57.59,-43.01],backgroundColor:CTL,barPercentage:.68,categoryPercentage:.6},
+           {label:'Blitz Sale buyers',data:[-55.98,-47.43],backgroundColor:EVT,barPercentage:.68,categoryPercentage:.6}]},
+ options:{responsive:true,maintainAspectRatio:false,
+  plugins:{...noLeg,tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+'%'}}},
+  scales:{x:{...gx,ticks:{color:INK,font:{size:12.5}}},y:{...gy(v=>v+'%'),suggestedMin:-70,max:0}}}},
+ [{id:'l',afterDatasetsDraw(c){const x=c.ctx;x.save();x.font="500 12px "+MONO;x.textAlign='center';
+   c.data.datasets.forEach((ds,di)=>c.getDatasetMeta(di).data.forEach((el,i)=>{x.fillStyle=di?EVT:INK3;
+     x.fillText(ds.data[i]+'%',el.x,el.y-7);}));x.restore();}}]);
+
+/* --- 7. Regular-only conversion --- */
+mk('cConvR',{type:'bar',data:{labels:['Before launch','After launch'],
+ datasets:[{label:'Weekend, regular packs only',data:[0.9244,0.8028],backgroundColor:EVT,barPercentage:.66,categoryPercentage:.6},
+           {label:'Weekday',data:[0.9328,0.7541],backgroundColor:CTL,barPercentage:.66,categoryPercentage:.6}]},
+ options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:16}},
+  plugins:{...noLeg,tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(3)+'%'}}},
+  scales:{x:{...gx,ticks:{color:INK,font:{size:12.5,weight:'500'}}},y:{...gy(v=>v.toFixed(1)+'%'),beginAtZero:true}}}},
+ [{id:'l',afterDatasetsDraw(c){const x=c.ctx;x.save();x.font="500 12px "+MONO;x.textAlign='center';
+   c.data.datasets.forEach((ds,di)=>c.getDatasetMeta(di).data.forEach((el,i)=>{x.fillStyle=di?INK3:EVT;
+     x.fillText(ds.data[i].toFixed(3)+'%',el.x,el.y-7);}));
+   x.font="600 12.5px "+MONO;const a=c.getDatasetMeta(0).data,b=c.getDatasetMeta(1).data;
+   x.fillStyle=POS;x.fillText('ratio 0.99',(a[0].x+b[0].x)/2,c.chartArea.bottom-14);
+   x.fillText('ratio 1.06',(a[1].x+b[1].x)/2,c.chartArea.bottom-14);x.restore();}}]);
+
+/* --- Test 2b: total conversion incl Blitz Sale, before/after --- */
+mk('cConvTot',{type:'bar',data:{labels:['Before launch','After launch'],
+ datasets:[{label:'Weekend, total incl. Blitz Sale',data:[1.1072,0.9991],backgroundColor:EVT,barPercentage:.66,categoryPercentage:.6},
+           {label:'Weekday',data:[0.7458,0.6105],backgroundColor:CTL,barPercentage:.66,categoryPercentage:.6}]},
+ options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:16}},
+  plugins:{...noLeg,tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(3)+'%'}}},
+  scales:{x:{...gx,ticks:{color:INK,font:{size:12.5,weight:'500'}}},y:{...gy(v=>v.toFixed(1)+'%'),beginAtZero:true}}}},
+ [{id:'l',afterDatasetsDraw(c){const x=c.ctx;x.save();x.font="500 12px "+MONO;x.textAlign='center';
+   c.data.datasets.forEach((ds,di)=>c.getDatasetMeta(di).data.forEach((el,i)=>{x.fillStyle=di?INK3:EVT;
+     x.fillText(ds.data[i].toFixed(3)+'%',el.x,el.y-7);}));
+   x.font="600 12.5px "+MONO;const a=c.getDatasetMeta(0).data,b=c.getDatasetMeta(1).data;
+   x.fillStyle=POS;x.fillText('ratio 1.48',(a[0].x+b[0].x)/2,c.chartArea.bottom-14);
+   x.fillText('ratio 1.64',(a[1].x+b[1].x)/2,c.chartArea.bottom-14);x.restore();}}]);
+
+/* --- 8. Incremental --- */
+mk('cInc',{type:'bar',data:{labels:['Expected on the control-day trend','Actual'],
+ datasets:[{data:[301722,328803],backgroundColor:[EVTL,EVT],barPercentage:.55}]},
+ options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:80}},
+  plugins:{...noLeg,tooltip:{callbacks:{label:c=>'$'+c.parsed.x.toLocaleString()}}},
+  scales:{x:{...gy(v=>'$'+(v/1000)+'k'),beginAtZero:true},y:{...gx,ticks:{color:INK,font:{size:12.5}}}}}},
+ [{id:'l',afterDatasetsDraw(c){const x=c.ctx;x.save();x.font="500 12.5px "+MONO;x.textAlign='right';
+   c.getDatasetMeta(0).data.forEach((el,i)=>{x.fillStyle=i?'#fff':INK2;
+     x.fillText('$'+c.data.datasets[0].data[i].toLocaleString(),el.x-10,el.y+4.5);});
+   const m=c.getDatasetMeta(0).data;x.textAlign='left';x.fillStyle=POS;x.font="600 13px "+MONO;
+   x.fillText('+$27,081',m[1].x+10,m[1].y+4.5);x.restore();}}]);
+
+/* --- 10. Weekday --- */
+mk('cWday',{type:'bar',data:{labels:['Fri','Sat','Sun','Mon','Tue','Wed','Thu'],
+ datasets:[{label:'Regular store',data:[9662,9936,10380,9466,9641,8739,8871],backgroundColor:CTL,barPercentage:.62,stack:'a'},
+           {label:'Blitz Sale',data:[191,1963,1752,249,1,1,1],backgroundColor:EVT,barPercentage:.62,stack:'a'}]},
+ options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:14}},
+  plugins:{...noLeg,tooltip:{callbacks:{label:c=>c.dataset.label+': $'+c.parsed.y.toLocaleString()}}},
+  scales:{x:{...gx,stacked:true,ticks:{color:INK,font:{size:12.5}}},y:{...gy(v=>'$'+(v/1000)+'k'),stacked:true,beginAtZero:true}}}},
+ [{id:'l',afterDatasetsDraw(c){const x=c.ctx;x.save();x.textAlign='center';x.font="500 11px "+MONO;x.fillStyle=INK2;
+   c.getDatasetMeta(1).data.forEach((el,i)=>{const t=c.data.datasets[0].data[i]+c.data.datasets[1].data[i];
+     x.fillText('$'+(t/1000).toFixed(1)+'k',el.x,el.y-7);});x.restore();}}]);
+
+/* --- 11. Funnel --- */
+mk('cFunnel',{type:'line',data:{labels:['Jun 1','Jun 8','Jun 15','Jun 22','Jun 29','Jul 6'],datasets:[
+ {label:'Active → any purchase',data:[4.3955,3.8458,3.2881,3.1983,2.9112,2.5738],borderColor:NEG,backgroundColor:NEG,tension:.25,borderWidth:2.4,pointRadius:3},
+ {label:'Payers → Blitz Sale',data:[6.4917,6.159,6.6043,5.2909,6.399,6.3777],borderColor:POS,backgroundColor:POS,tension:.25,borderWidth:2.4,pointRadius:3}]},
+ options:{responsive:true,maintainAspectRatio:false,
+  plugins:{...noLeg,tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},
+  scales:{x:gx,y:{...gy(v=>v.toFixed(0)+'%'),beginAtZero:true,suggestedMax:10}}}});
+
+/* --- Blitz Sale share of weekend (Sat+Sun) revenue --- */
+mk('cWkndShare',{type:'bar',data:{labels:['Before\nlaunch','Jun 5','Jun 12','Jun 19','Jun 26','Jul 3','Jul 10','Jul 17'],
+ datasets:[{data:[0.305,9.6741,10.2353,11.5039,8.0093,10.0199,10.4879,10.5802],
+   backgroundColor:(c)=>c.dataIndex===0?CTL:EVT,barPercentage:.62}]},
+ options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:16}},
+  plugins:{...noLeg,tooltip:{callbacks:{label:c=>c.parsed.y+'% of weekend revenue'}}},
+  scales:{x:{...gx,ticks:{color:INK,font:{size:11.5}}},y:{...gy(v=>v+'%'),beginAtZero:true,suggestedMax:16}}}},
+ [{id:'l',afterDatasetsDraw(c){const x=c.ctx;x.save();x.font="600 12px "+MONO;x.textAlign='center';
+   c.getDatasetMeta(0).data.forEach((el,i)=>{x.fillStyle=i===0?INK3:EVT;
+     x.fillText(c.data.datasets[0].data[i]+'%',el.x,el.y-8);});x.restore();}},
+  {id:'avg',afterDatasetsDraw(c){const x=c.ctx,py=c.scales.y.getPixelForValue(10.1);x.save();
+   x.strokeStyle=INK3;x.setLineDash([3,3]);x.lineWidth=1;x.beginPath();
+   x.moveTo(c.chartArea.left,py);x.lineTo(c.chartArea.right,py);x.stroke();x.setLineDash([]);
+   x.fillStyle=INK3;x.font="500 10.5px "+MONO;x.textAlign='left';
+   x.fillText('POST-LAUNCH AVG 10.1%',c.chartArea.left+4,py-6);x.restore();}}]);
+
+/* --- Retention D0-D7, buyer vs control --- */
+mk('cRetain',{type:'line',data:{labels:['D0','D1','D2','D3','D4','D5','D6','D7'],datasets:[
+ {label:'Blitz Sale buyers',data:[57.4826,48.4176,36.9916,32.2383,25.3085,23.911,23.5474,23.006],borderColor:EVT,backgroundColor:EVT,tension:.25,borderWidth:2.4,pointRadius:3},
+ {label:'Matched control',data:[47.4091,34.915,26.5443,15.4027,14.6913,9.3916,10.2086,9.4556],borderColor:CTL,backgroundColor:CTL,tension:.25,borderWidth:2.4,pointRadius:3,borderDash:[4,3]}]},
+ options:{responsive:true,maintainAspectRatio:false,
+  plugins:{...noLeg,tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+'%'}}},
+  scales:{x:gx,y:{...gy(v=>v+'%'),beginAtZero:true}}}});
+
+/* --- Median playtime D0-D7, buyer vs control --- */
+mk('cPlaytime',{type:'line',data:{labels:['D0','D1','D2','D3','D4','D5','D6','D7'],datasets:[
+ {label:'Blitz Sale buyers',data:[7771,6802,6032,5348,5384,4956,5166,6052],borderColor:EVT,backgroundColor:EVT,tension:.25,borderWidth:2.4,pointRadius:3},
+ {label:'Matched control',data:[2637,2474,2952,2726,3304,3138,3557,3961],borderColor:CTL,backgroundColor:CTL,tension:.25,borderWidth:2.4,pointRadius:3,borderDash:[4,3]}]},
+ options:{responsive:true,maintainAspectRatio:false,
+  plugins:{...noLeg,tooltip:{callbacks:{label:c=>c.dataset.label+': '+Math.round(c.parsed.y/60)+' min'}}},
+  scales:{x:gx,y:{...gy(v=>Math.round(v/60)+'m'),beginAtZero:true}}}});
+
+/* --- D7 retention by shop level, buyer vs control --- */
+mk('cLevelRet',{type:'bar',data:{labels:['L06-10','L11-15','L16-20','L21-25','L26-30'],
+ datasets:[{label:'Blitz Sale buyers',data:[22.6577,22.0094,26.635,29.8313,24.2094],backgroundColor:EVT,barPercentage:.66,categoryPercentage:.6},
+           {label:'Matched control',data:[9.6582,8.5503,11.5892,15.4014,16.9267],backgroundColor:CTL,barPercentage:.66,categoryPercentage:.6}]},
+ options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:16}},
+  plugins:{...noLeg,tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+'%'}}},
+  scales:{x:{...gx,ticks:{color:INK,font:{size:12}}},y:{...gy(v=>v+'%'),beginAtZero:true}}}},
+ [{id:'l',afterDatasetsDraw(c){const x=c.ctx;x.save();x.font="600 12px "+MONO;x.textAlign='center';
+   const ratios=['2.3x','2.6x','2.3x','1.9x','1.4x'];
+   c.getDatasetMeta(0).data.forEach((el,i)=>{x.fillStyle=POS;x.fillText(ratios[i],el.x,el.y-8);});x.restore();}}]);
+
+/* --- Buyer conversion, weekday vs weekend --- */
+mk('cWkdyEngage',{type:'bar',data:{labels:['Weekday','Weekend'],
+ datasets:[{label:'Blitz Sale buyers',data:[5.61,11.44],backgroundColor:EVT,barPercentage:.66,categoryPercentage:.6},
+           {label:'Matched control',data:[0.3293,0.3157],backgroundColor:CTL,barPercentage:.66,categoryPercentage:.6}]},
+ options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:16}},
+  plugins:{...noLeg,tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+'%'}}},
+  scales:{x:{...gx,ticks:{color:INK,font:{size:12.5,weight:'500'}}},y:{...gy(v=>v+'%'),beginAtZero:true}}}},
+ [{id:'l',afterDatasetsDraw(c){const x=c.ctx;x.save();x.font="500 12px "+MONO;x.textAlign='center';
+   c.data.datasets.forEach((ds,di)=>c.getDatasetMeta(di).data.forEach((el,i)=>{x.fillStyle=di?INK3:EVT;
+     x.fillText(ds.data[i]+'%',el.x,el.y-7);}));x.restore();}}]);
+</script>
+</body></html>

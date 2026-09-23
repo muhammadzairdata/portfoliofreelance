@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Muhammad Zair — Data Analyst | Portfolio</title>
+<meta name="description" content="Portfolio of Muhammad Zair, a Microsoft-certified Power BI Data Analyst with 3+ years of experience in BI, dashboards, A/B testing and gaming analytics.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0E14;          /* deep ink navy */
+    --panel:#111621;       /* raised slate  */
+    --panel-2:#161C29;
+    --line:#222A3A;        /* hairline      */
+    --line-soft:#1A2130;
+    --text:#E7EBF2;
+    --muted:#8B93A7;
+    --dim:#5C6478;
+    --cyan:#49D9C6;        /* primary signal */
+    --cyan-deep:#2BA697;
+    --amber:#E7A85A;       /* highlight / data */
+    --coral:#E7695C;       /* negative / alert */
+    --violet:#8E8DF2;      /* categorical extra */
+    --glow:rgba(73,217,198,0.14);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;
+    line-height:1.5;overflow-x:hidden;
+  }
+  ::selection{background:var(--cyan);color:var(--bg);}
+  a{color:inherit;}
+  .wrap{width:100%;max-width:1680px;margin:0 auto;padding:0 clamp(24px,4vw,72px);}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* plotted-grid ambient background */
+  .grid-bg{
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,0.022) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.022) 1px, transparent 1px);
+    background-size:48px 48px;
+    mask-image:radial-gradient(ellipse 90% 60% at 50% 0%, #000 30%, transparent 100%);
+    -webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%, #000 30%, transparent 100%);
+  }
+  .glow-bg{
+    position:fixed;top:-260px;left:50%;transform:translateX(-50%);
+    width:900px;height:600px;pointer-events:none;z-index:0;
+    background:radial-gradient(circle at 50% 40%, var(--glow), transparent 62%);
+    filter:blur(20px);
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky;top:0;z-index:40;
+    background:rgba(11,14,20,0.72);backdrop-filter:blur(10px) saturate(140%);
+    border-bottom:1px solid var(--line-soft);
+  }
+  nav{display:flex;align-items:center;justify-content:space-between;padding:16px clamp(24px,4vw,72px);max-width:1680px;margin:0 auto;}
+  .brand{font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:0.05em;color:var(--text);display:flex;align-items:center;gap:9px;}
+  .brand .dot{width:8px;height:8px;background:var(--cyan);border-radius:50%;box-shadow:0 0 0 3px rgba(73,217,198,0.18);animation:pulse 2.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+  .navlinks{display:flex;}
+  nav a.navlink{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.03em;color:var(--muted);text-decoration:none;margin-left:26px;text-transform:uppercase;transition:color .16s;position:relative;}
+  nav a.navlink::after{content:"";position:absolute;left:0;bottom:-5px;width:0;height:1px;background:var(--cyan);transition:width .2s;}
+  nav a.navlink:hover{color:var(--text);}
+  nav a.navlink:hover::after{width:100%;}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;z-index:1;padding:96px 0 60px;}
+  .hero-top{display:grid;grid-template-columns:1.05fr 0.95fr;gap:52px;align-items:center;margin-bottom:44px;}
+  .hero-copy h1.display{font-size:clamp(34px,4.7vw,60px);max-width:none;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:11px;margin-bottom:28px;}
+  .eyebrow::before{content:"";width:28px;height:1px;background:var(--cyan);display:inline-block;box-shadow:0 0 8px var(--cyan);}
+  h1.display{
+    font-family:'Space Grotesk',sans-serif;font-weight:600;
+    font-size:clamp(38px,6.2vw,74px);line-height:1.02;letter-spacing:-0.02em;
+    margin:0 0 26px;max-width:880px;
+  }
+  h1.display em{font-style:normal;color:var(--cyan);position:relative;}
+  h1.display em::after{content:"";position:absolute;left:0;right:0;bottom:0.08em;height:0.14em;background:var(--cyan);opacity:0.18;border-radius:2px;}
+  .hero-sub{font-size:17px;line-height:1.65;color:var(--muted);max-width:600px;margin:0 0 38px;}
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:56px;}
+  .btn{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.02em;padding:13px 22px;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .16s, box-shadow .16s, background .16s, border-color .16s;border:1px solid transparent;cursor:pointer;}
+  .btn-primary{background:var(--cyan);color:#04211D;font-weight:600;}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px -8px var(--cyan);}
+  .btn-ghost{border-color:var(--line);color:var(--text);background:rgba(255,255,255,0.015);}
+  .btn-ghost:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-2px);}
+
+  /* hero dashboard panel (signature) */
+  .hero-visual{position:relative;}
+  .hv-panel{
+    position:relative;border:1px solid var(--line);border-radius:18px;
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    padding:16px 18px 14px;overflow:hidden;
+    box-shadow:0 34px 80px -38px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .hv-panel::before{content:"";position:absolute;top:-40%;right:-20%;width:320px;height:320px;
+    background:radial-gradient(circle,var(--glow),transparent 62%);pointer-events:none;}
+  .hv-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;position:relative;z-index:1;}
+  .hv-dots{display:inline-flex;gap:6px;}
+  .hv-dots i{width:9px;height:9px;border-radius:50%;background:var(--line);display:inline-block;}
+  .hv-dots i:first-child{background:var(--coral);opacity:.7;}
+  .hv-dots i:nth-child(2){background:var(--amber);opacity:.7;}
+  .hv-dots i:nth-child(3){background:var(--cyan);opacity:.7;}
+  .hv-title{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.03em;color:var(--muted);display:flex;align-items:center;gap:8px;}
+  .hv-live{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 3px rgba(73,217,198,0.16);animation:pulse 2.4s ease-in-out infinite;}
+  .hv-badge{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.04em;color:var(--cyan);border:1px solid var(--line);padding:3px 9px;border-radius:20px;}
+  .hv-chart{width:100%;height:auto;display:block;position:relative;z-index:1;}
+  .hv-legend{display:flex;gap:18px;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);position:relative;z-index:1;}
+  .hv-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;vertical-align:middle;}
+  .hv-tip{position:absolute;top:44px;right:34px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.03em;color:var(--bg);background:var(--cyan);padding:4px 9px;border-radius:6px;z-index:2;box-shadow:0 6px 18px -6px var(--cyan);}
+  .hv-tip::after{content:"";position:absolute;left:50%;bottom:-4px;transform:translateX(-50%) rotate(45deg);width:8px;height:8px;background:var(--cyan);}
+  .hv-dot{filter:drop-shadow(0 0 6px var(--cyan));animation:pulse 2.4s ease-in-out infinite;}
+
+
+  .readout{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    box-shadow:0 24px 60px -30px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+  .readout .cell{padding:22px 22px 18px;border-right:1px solid var(--line);position:relative;}
+  .readout .cell:last-child{border-right:none;}
+  .readout .label{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.09em;text-transform:uppercase;color:var(--dim);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+  .readout .label::before{content:"";width:5px;height:5px;border-radius:1px;background:var(--cyan);}
+  .readout .value{font-family:'Space Grotesk',sans-serif;font-size:34px;font-weight:600;line-height:1;letter-spacing:-0.02em;}
+  .readout .value .suffix{color:var(--cyan);font-size:22px;}
+  .readout .stack{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;line-height:1.5;color:var(--text);}
+  .readout .stack span{color:var(--cyan);}
+  .spark{display:block;margin-top:12px;width:100%;height:26px;overflow:visible;}
+
+  /* ---------- sections ---------- */
+  .section{padding:76px 0;position:relative;z-index:1;}
+  .section-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:36px;flex-wrap:wrap;gap:16px;padding-bottom:22px;border-bottom:1px solid var(--line);}
+  .section-tag{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.1em;color:var(--cyan);text-transform:uppercase;}
+  .section-note{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.03em;color:var(--dim);max-width:320px;text-align:right;line-height:1.5;}
+  h2.section-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:clamp(26px,3.4vw,40px);margin:8px 0 0;letter-spacing:-0.02em;}
+
+  /* ---------- work grid ---------- */
+  .work-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .card{
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line);border-radius:14px;padding:0;
+    display:flex;flex-direction:column;text-decoration:none;color:var(--text);
+    position:relative;overflow:hidden;transition:transform .18s, border-color .18s, box-shadow .18s;
+  }
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--cyan);opacity:0;transition:opacity .18s;z-index:2;}
+  .card:hover{transform:translateY(-4px);border-color:#31405a;box-shadow:0 22px 50px -28px rgba(0,0,0,0.9);}
+  .card:hover::before{opacity:1;}
+  .card:hover .card-title{color:var(--cyan);}
+  .card:hover .card-arrow{transform:translate(3px,-3px);color:var(--cyan);}
+  .card-thumb{position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--panel-2);border-bottom:1px solid var(--line);flex-shrink:0;}
+  .card-thumb img{width:100%;height:100%;object-fit:cover;object-position:top;display:block;transition:transform .35s;}
+  .card:hover .card-thumb img{transform:scale(1.045);}
+  .card-body{padding:16px 18px 15px;display:flex;flex-direction:column;flex:1;}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:11px;}
+  .card-index{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:0.06em;}
+  .card-arrow{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--dim);transition:transform .18s, color .18s;}
+  .card-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;margin:0 0 7px;line-height:1.24;letter-spacing:-0.01em;transition:color .16s;}
+  .card-desc{font-size:12.5px;line-height:1.5;color:var(--muted);margin:0 0 13px;flex-grow:1;}
+  .card-tags{display:flex;flex-wrap:wrap;gap:5px;border-top:1px solid var(--line-soft);padding-top:12px;}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.03em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.03);border:1px solid var(--line-soft);padding:3px 7px;border-radius:5px;}
+
+  /* ---------- power bi gallery ---------- */
+  .pbi-group{margin-bottom:48px;}
+  .pbi-group:last-child{margin-bottom:0;}
+  .pbi-group-head{display:flex;align-items:baseline;gap:14px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;}
+  .pbi-group-head .pbi-num{font-size:10.5px;color:var(--cyan);letter-spacing:0.08em;padding:3px 8px;border:1px solid var(--line);border-radius:5px;}
+  .pbi-group-head .pbi-name{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;color:var(--text);letter-spacing:-0.01em;}
+  .pbi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .pbi-thumb{
+    display:block;border:1px solid var(--line);background:var(--panel-2);
+    cursor:zoom-in;overflow:hidden;position:relative;border-radius:10px;
+    aspect-ratio:16/9;padding:0;transition:transform .2s, border-color .2s, box-shadow .2s;
+  }
+  .pbi-thumb:hover{transform:translateY(-3px);border-color:#31405a;box-shadow:0 18px 40px -22px rgba(0,0,0,0.9);}
+  .pbi-thumb img{width:100%;height:100%;object-fit:cover;object-position:top;display:block;transition:transform .3s;}
+  .pbi-thumb:hover img{transform:scale(1.05);}
+  .pbi-thumb .pbi-cap{
+    position:absolute;left:0;right:0;bottom:0;padding:9px 11px;text-align:left;
+    background:linear-gradient(to top, rgba(6,9,14,0.9), transparent);
+    color:#fff;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.02em;
+  }
+  /* placeholder shown when a screenshot file is missing */
+  .pbi-fallback{
+    position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;
+    padding:14px;background:
+      linear-gradient(180deg,var(--panel),var(--panel-2));
+  }
+  .pbi-fallback .fb-top{display:flex;align-items:center;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.08em;color:var(--dim);text-transform:uppercase;}
+  .pbi-fallback .fb-top .fb-chip{padding:2px 6px;border:1px solid var(--line);border-radius:4px;color:var(--cyan);}
+  .pbi-fallback .fb-bars{display:flex;align-items:flex-end;gap:5px;height:44%;padding:0 2px;}
+  .pbi-fallback .fb-bars i{flex:1;border-radius:2px 2px 0 0;background:linear-gradient(180deg,var(--cyan-deep),rgba(73,217,198,0.15));opacity:0.85;}
+  .pbi-fallback .fb-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);letter-spacing:0.02em;}
+  .pbi-fallback .fb-label b{color:var(--text);font-weight:600;display:block;font-size:12px;margin-bottom:2px;}
+
+  /* ---------- about ---------- */
+  .section.alt{background:linear-gradient(180deg, rgba(18,22,33,0.5), rgba(11,14,20,0));border-top:1px solid var(--line-soft);}
+  .about-grid{display:grid;grid-template-columns:0.8fr 1.35fr;gap:52px;align-items:start;}
+  .about-grid p{font-size:16px;line-height:1.75;color:var(--muted);margin:0 0 18px;}
+  .about-grid p:last-child{margin-bottom:0;}
+  .about-grid p strong{color:var(--text);font-weight:600;}
+  .portrait{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel);box-shadow:0 26px 60px -34px rgba(0,0,0,0.9);}
+  .portrait::after{content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(73,217,198,0.14);}
+  .portrait img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;object-position:center 22%;filter:contrast(1.02) saturate(1.02);}
+  .portrait-tag{position:absolute;left:12px;bottom:12px;display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.02em;color:var(--text);background:rgba(11,14,20,0.72);backdrop-filter:blur(6px);border:1px solid var(--line);padding:7px 11px;border-radius:8px;}
+  .portrait-tag .pt-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);}
+  .skills-band{margin-top:44px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,var(--panel),var(--panel-2));padding:30px 32px;}
+  .about-sub{font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:0.06em;color:var(--cyan);margin-top:12px;}
+  .cert{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.02em;color:var(--text);border:1px solid var(--line);background:rgba(73,217,198,0.06);padding:7px 12px;border-radius:20px;margin-bottom:20px;}
+  .cert .cert-mark{width:9px;height:9px;border-radius:2px;background:conic-gradient(from 0deg,var(--cyan),var(--amber),var(--violet),var(--cyan));}
+  .subhead{margin:52px 0 20px;padding-bottom:14px;border-bottom:1px solid var(--line);}
+  .subhead-tag{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--cyan);}
+  .build-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:14px;}
+  .build-item{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:20px;position:relative;overflow:hidden;transition:border-color .16s, transform .16s;}
+  .build-item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--cyan);opacity:0;transition:opacity .16s;}
+  .build-item:hover{border-color:#31405a;transform:translateY(-3px);}
+  .build-item:hover::before{opacity:1;}
+  .build-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15.5px;margin-bottom:7px;}
+  .build-desc{font-size:13px;line-height:1.55;color:var(--muted);}
+  .why-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  .why-item{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:16px 18px;font-size:14.5px;color:var(--text);}
+  .why-check{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex-shrink:0;border-radius:50%;background:rgba(73,217,198,0.12);color:var(--cyan);font-size:12px;font-weight:700;}
+  .skills-block .skills-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:var(--cyan);margin-bottom:14px;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px;}
+  .chip{font-family:'JetBrains Mono',monospace;font-size:12px;border:1px solid var(--line);background:rgba(255,255,255,0.02);padding:6px 12px;border-radius:6px;color:var(--text);transition:border-color .16s, color .16s;}
+  .chip:hover{border-color:var(--cyan);color:var(--cyan);}
+  .process{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:44px;}
+  .process .step{padding:22px;border:1px solid var(--line);border-radius:12px;background:var(--panel);position:relative;}
+  .process .step-num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan);margin-bottom:12px;}
+  .process .step-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15.5px;margin-bottom:8px;}
+  .process .step-desc{font-size:13.5px;color:var(--muted);line-height:1.55;}
+
+  /* ---------- contact ---------- */
+  .contact-inner{display:grid;grid-template-columns:1.4fr 1fr;gap:56px;align-items:end;}
+  .contact-inner h2.section-title{margin-bottom:18px;}
+  .contact-desc{font-size:16px;line-height:1.7;color:var(--muted);max-width:460px;}
+  .contact-list{list-style:none;padding:0;margin:0;}
+  .contact-list li{border-top:1px solid var(--line);padding:16px 0;display:flex;justify-content:space-between;align-items:center;}
+  .contact-list li:last-child{border-bottom:1px solid var(--line);}
+  .contact-list .clabel{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--dim);}
+  .contact-list a{color:var(--text);text-decoration:none;font-size:15px;font-family:'JetBrains Mono',monospace;transition:color .16s;}
+  .contact-list a:hover{color:var(--cyan);}
+
+  footer{border-top:1px solid var(--line-soft);padding:26px 0;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--dim);position:relative;z-index:1;}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+
+  /* ---------- lightbox ---------- */
+  #lightbox{display:none;position:fixed;inset:0;z-index:200;background:rgba(6,8,12,0.94);backdrop-filter:blur(4px);align-items:center;justify-content:center;flex-direction:column;}
+  #lightbox.active{display:flex;}
+  #lightbox img{max-width:90vw;max-height:78vh;border:1px solid var(--line);border-radius:8px;box-shadow:0 30px 80px rgba(0,0,0,.7);}
+  #lightbox .lb-cap{color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12.5px;margin-top:16px;letter-spacing:0.03em;text-align:center;}
+  .lb-close{position:absolute;top:22px;right:28px;background:transparent;border:1px solid var(--line);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;padding:8px 14px;border-radius:7px;cursor:pointer;transition:border-color .16s;}
+  .lb-close:hover{border-color:var(--cyan);color:var(--cyan);}
+  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:transparent;border:1px solid var(--line);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:18px;width:46px;height:46px;border-radius:9px;cursor:pointer;transition:border-color .16s, color .16s;}
+  .lb-nav:hover{border-color:var(--cyan);color:var(--cyan);}
+  .lb-prev{left:24px;}
+  .lb-next{right:24px;}
+
+  /* ---------- scroll reveal ---------- */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1;transform:none;}
+
+  /* ---------- focus + reduced motion ---------- */
+  a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:4px;}
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;scroll-behavior:auto !important;}
+    .reveal{opacity:1;transform:none;}
+  }
+
+  @media (max-width:1180px) and (min-width:861px){
+    .work-grid{grid-template-columns:repeat(2,1fr);}
+  }
+
+  @media (max-width:860px){
+    .hero{padding:72px 0 48px;}
+    .hero-top{grid-template-columns:1fr;gap:34px;}
+    .about-grid,.contact-inner{grid-template-columns:1fr;gap:34px;}
+    .portrait{max-width:320px;}
+    .readout{grid-template-columns:1fr;}
+    .readout .cell{border-right:none;border-bottom:1px solid var(--line);}
+    .readout .cell:last-child{border-bottom:none;}
+    .work-grid{grid-template-columns:1fr;}
+    .process{grid-template-columns:1fr 1fr;}
+    .why-grid{grid-template-columns:1fr;}
+    .pbi-grid{grid-template-columns:repeat(2,1fr);}
+    nav{padding:14px 20px;}
+    .navlinks a:not(:last-child){display:none;}
+    .section-note{text-align:left;}
+  }
+  @media (max-width:560px){
+    .wrap{padding:0 20px;}
+    .process{grid-template-columns:1fr;}
+    .pbi-grid{grid-template-columns:1fr;}
+    .lb-nav{width:38px;height:38px;font-size:15px;}
+    .lb-prev{left:8px;}.lb-next{right:8px;}
+  }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-bg"></div>
+
+<header>
+  <nav>
+    <div class="brand"><span class="dot"></span>MUHAMMAD&nbsp;ZAIR · DATA ANALYST</div>
+    <div class="navlinks">
+      <a class="navlink" href="#work">Work</a>
+      <a class="navlink" href="#powerbi">Power BI</a>
+      <a class="navlink" href="#about">About</a>
+      <a class="navlink" href="#contact">Contact</a>
+    </div>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <div class="hero-copy">
+        <span class="cert reveal"><span class="cert-mark"></span>Microsoft Certified · Power BI Data Analyst</span>
+        <h1 class="display reveal">Turning raw data into dashboards people <em>act on</em>.</h1>
+        <p class="hero-sub reveal">
+          I'm a Microsoft-certified Power BI Data Analyst with 3+ years of experience turning raw data
+          into clear, UI/UX-driven reporting. Beyond Power BI, I work with SQL, Python, Excel, Tableau,
+          Looker, and custom interactive HTML dashboards.
+        </p>
+        <div class="hero-actions reveal">
+          <a class="btn btn-primary" href="#work">View my work ↓</a>
+          <a class="btn btn-ghost" href="#contact">Contact me</a>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal">
+        <div class="hv-panel">
+          <div class="hv-head">
+            <span class="hv-dots"><i></i><i></i><i></i></span>
+            <span class="hv-title">Sample dashboard</span>
+          </div>
+          <svg class="hv-chart" viewBox="0 0 460 214" preserveAspectRatio="none" role="img" aria-label="Sample dashboard chart">
+            <defs>
+              <linearGradient id="hvFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--cyan)" stop-opacity="0.28"/>
+                <stop offset="100%" stop-color="var(--cyan)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <g class="hv-grid" stroke="var(--line)" stroke-width="1">
+              <line x1="40" y1="60"  x2="448" y2="60"/>
+              <line x1="40" y1="100" x2="448" y2="100"/>
+              <line x1="40" y1="140" x2="448" y2="140"/>
+              <line x1="40" y1="180" x2="448" y2="180"/>
+            </g>
+            <polygon class="hv-area" fill="url(#hvFill)"
+              points="40,200 40,185 76,168 113,175 149,150 185,158 222,132 258,140 294,110 331,120 367,86 404,72 440,52 440,200"/>
+            <polyline class="hv-line hv-c3" fill="none" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"
+              points="40,170 76,168 113,165 149,166 185,160 222,162 258,158 294,159 331,154 367,156 404,150 440,148"/>
+            <polyline class="hv-line hv-c2" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"
+              points="40,150 76,145 113,152 149,138 185,142 222,135 258,128 294,130 331,118 367,122 404,108 440,100"/>
+            <polyline class="hv-line hv-c1" fill="none" stroke="var(--cyan)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"
+              points="40,185 76,168 113,175 149,150 185,158 222,132 258,140 294,110 331,120 367,86 404,72 440,52"/>
+            <circle class="hv-dot" cx="440" cy="52" r="4" fill="var(--cyan)"/>
+          </svg>
+          <div class="hv-legend">
+            <span><i style="background:var(--cyan)"></i>Series A</span>
+            <span><i style="background:var(--amber)"></i>Series B</span>
+            <span><i style="background:var(--violet)"></i>Series C</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="readout reveal">
+      <div class="cell">
+        <div class="label">Years of experience</div>
+        <div class="value" data-count="3"><span class="num">0</span><span class="suffix">+</span></div>
+        <svg class="spark" viewBox="0 0 120 26" preserveAspectRatio="none" data-spark="6,22 26,18 46,15 66,12 86,8 114,4"></svg>
+      </div>
+      <div class="cell">
+        <div class="label">Dashboards &amp; reports</div>
+        <div class="value" data-count="100"><span class="num">0</span><span class="suffix">+</span></div>
+        <svg class="spark" viewBox="0 0 120 26" preserveAspectRatio="none" data-spark="6,20 26,15 46,17 66,9 86,11 114,3"></svg>
+      </div>
+      <div class="cell">
+        <div class="label">Core stack</div>
+        <div class="stack">Power BI · SQL<br>Excel · Python<br><span>DAX · ETL</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="work">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div>
+        <div class="section-tag">Selected projects / 11 reports</div>
+        <h2 class="section-title">Reports &amp; dashboards</h2>
+      </div>
+    </div>
+
+    <div class="work-grid">
+
+      <a class="card reveal" href="nimbus-monetization-hub.html" target="_blank" rel="noopener">
+        <div class="card-thumb"><img src="assets/thumbs/nimbus-monetization-hub.jpg" alt="Nimbus — Monetization Hub thumbnail" loading="lazy" onerror="cardThumbFallback(this)"></div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-index">REPORT_01</span><span class="card-arrow">↗</span></div>
+          <h3 class="card-title">Nimbus — Monetization Hub</h3>
+          <p class="card-desc">A full monetization command center: DAU/MAU, whales, retention, FTP, and revenue in one interactive D3 dashboard.</p>
+          <div class="card-tags"><span class="tag">Dashboard</span><span class="tag">Monetization</span></div>
+        </div>
+      </a>
+
+      <a class="card reveal" href="nimbus-ab-test-report.html" target="_blank" rel="noopener">
+        <div class="card-thumb"><img src="assets/thumbs/nimbus-ab-test-report.jpg" alt="Nimbus — A/B Test Report thumbnail" loading="lazy" onerror="cardThumbFallback(this)"></div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-index">REPORT_02</span><span class="card-arrow">↗</span></div>
+          <h3 class="card-title">Nimbus — A/B Test Report</h3>
+          <p class="card-desc">Full single-test readout: variant performance, statistical confidence, and a clear ship / no-ship recommendation.</p>
+          <div class="card-tags"><span class="tag">A/B Testing</span><span class="tag">Stats</span></div>
+        </div>
+      </a>
+
+      <a class="card reveal" href="nimbus-datalens-dashboard.html" target="_blank" rel="noopener">
+        <div class="card-thumb"><img src="assets/thumbs/nimbus-datalens-dashboard.jpg" alt="Nimbus — Datalens Dashboard thumbnail" loading="lazy" onerror="cardThumbFallback(this)"></div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-index">REPORT_03</span><span class="card-arrow">↗</span></div>
+          <h3 class="card-title">Nimbus — Datalens Dashboard</h3>
+          <p class="card-desc">Interactive DAU/MAU, retention, and revenue dashboard used for daily monitoring of live health.</p>
+          <div class="card-tags"><span class="tag">Dashboard</span><span class="tag">KPI Tracking</span></div>
+        </div>
+      </a>
+
+      <a class="card reveal" href="aso_report.html" target="_blank" rel="noopener">
+        <div class="card-thumb"><img src="assets/thumbs/aso-report.jpg" alt="ASO Report thumbnail" loading="lazy" onerror="cardThumbFallback(this)"></div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-index">REPORT_04</span><span class="card-arrow">↗</span></div>
+          <h3 class="card-title">ASO Report</h3>
+          <p class="card-desc">Android vs iOS store-listing performance, live from Google Sheets — star-rating mix and review volume compared side by side.</p>
+          <div class="card-tags"><span class="tag">ASO</span><span class="tag">Live Data</span></div>
+        </div>
+      </a>
+
+      <a class="card reveal" href="ua_report.html" target="_blank" rel="noopener">
+        <div class="card-thumb"><img src="assets/thumbs/ua-report.jpg" alt="UA Report thumbnail" loading="lazy" onerror="cardThumbFallback(this)"></div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-index">REPORT_05</span><span class="card-arrow">↗</span></div>
+          <h3 class="card-title">UA Report</h3>
+          <p class="card-desc">Combined user-acquisition performance across Android and iOS — spend, revenue, profit, ROI and installs, live from Google Sheets.</p>
+          <div class="card-tags"><span class="tag">UA</span><span class="tag">Live Data</span></div>
+        </div>
+      </a>
+
+      <a class="card reveal" href="vertex-ab-test-reports.html" target="_blank" rel="noopener">
+        <div class="card-thumb"><img src="assets/thumbs/vertex-ab-test-reports.jpg" alt="Vertex — A/B Test Reports thumbnail" loading="lazy" onerror="cardThumbFallback(this)"></div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-index">REPORT_06</span><span class="card-arrow">↗</span></div>
+          <h3 class="card-title">Vertex — A/B Test Reports</h3>
+          <p class="card-desc">Filtered, date-scoped experiment reporting layer built to compare test cohorts side by side.</p>
+          <div class="card-tags"><span class="tag">A/B Testing</span><span class="tag">Filtering</span></div>
+        </div>
+      </a>
+
+      <a class="card reveal" href="vertex-shop-level-analysis.html" target="_blank" rel="noopener">
+        <div class="card-thumb"><img src="assets/thumbs/vertex-shop-level-analysis.jpg" alt="Vertex — Shop-Level Analysis thumbnail" loading="lazy" onerror="cardThumbFallback(this)"></div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-index">REPORT_07</span><span class="card-arrow">↗</span></div>
+          <h3 class="card-title">Vertex — Shop-Level Analysis</h3>
+          <p class="card-desc">Item-by-item breakdown of shop performance to find which SKUs drive revenue and which are dead weight.</p>
+          <div class="card-tags"><span class="tag">Revenue</span><span class="tag">Product Analytics</span></div>
+        </div>
+      </a>
+
+      <a class="card reveal" href="vertex-iap-revenue-share.html" target="_blank" rel="noopener">
+        <div class="card-thumb"><img src="assets/thumbs/vertex-iap-revenue-share.jpg" alt="Vertex — IAP Revenue Share thumbnail" loading="lazy" onerror="cardThumbFallback(this)"></div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-index">REPORT_08</span><span class="card-arrow">↗</span></div>
+          <h3 class="card-title">Vertex — IAP Revenue Share</h3>
+          <p class="card-desc">Breaks down in-app purchase revenue by segment and platform to explain where the money actually comes from.</p>
+          <div class="card-tags"><span class="tag">Monetization</span><span class="tag">Revenue</span></div>
+        </div>
+      </a>
+
+      <a class="card reveal" href="vertex-conversion-investigation.html" target="_blank" rel="noopener">
+        <div class="card-thumb"><img src="assets/thumbs/vertex-conversion-investigation.jpg" alt="Vertex — Conversion Investigation thumbnail" loading="lazy" onerror="cardThumbFallback(this)"></div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-index">REPORT_09</span><span class="card-arrow">↗</span></div>
+          <h3 class="card-title">Vertex — Conversion Investigation</h3>
+          <p class="card-desc">Root-cause investigation into a conversion drop, walking from symptom to diagnosis to recommended fix.</p>
+          <div class="card-tags"><span class="tag">Investigation</span><span class="tag">Funnel</span></div>
+        </div>
+      </a>
+
+      <a class="card reveal" href="iap-decline-audit-charts.html" target="_blank" rel="noopener">
+        <div class="card-thumb"><img src="assets/thumbs/iap-decline-audit-charts.jpg" alt="IAP Decline Audit — Charts thumbnail" loading="lazy" onerror="cardThumbFallback(this)"></div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-index">REPORT_10</span><span class="card-arrow">↗</span></div>
+          <h3 class="card-title">IAP Decline Audit — Charts</h3>
+          <p class="card-desc">Every number behind an IAP revenue decline laid out as charts, built for a fast leadership skim.</p>
+          <div class="card-tags"><span class="tag">Audit</span><span class="tag">Charts</span></div>
+        </div>
+      </a>
+
+      <a class="card reveal" href="blitz-sale-analysis.html" target="_blank" rel="noopener">
+        <div class="card-thumb"><img src="assets/thumbs/blitz-sale-analysis.jpg" alt="Blitz Sale — Cannibalization Check thumbnail" loading="lazy" onerror="cardThumbFallback(this)"></div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-index">REPORT_11</span><span class="card-arrow">↗</span></div>
+          <h3 class="card-title">Blitz Sale — Cannibalization Check</h3>
+          <p class="card-desc">Focused study on one limited-time event, asking a single sharp question: is it cannibalizing core IAP revenue?</p>
+          <div class="card-tags"><span class="tag">Event Analysis</span><span class="tag">Revenue</span></div>
+        </div>
+      </a>
+
+    </div>
+
+    <div class="pbi-group reveal" style="margin-top:34px">
+      <div class="pbi-group-head"><span class="pbi-num">CUSTOM BUILD</span><span class="pbi-name">UA &amp; Revenue Dashboard — custom HTML/D3</span></div>
+      <div class="pbi-grid" id="extra-shots">
+        <button class="pbi-thumb" type="button">
+          <img src="assets/screenshots/playspare-daily-overview.png" alt="Daily overview: revenue, spend, profit and blended ROI KPIs with a daily trend chart" loading="lazy">
+          <span class="pbi-cap">Daily overview</span>
+        </button>
+        <button class="pbi-thumb" type="button">
+          <img src="assets/screenshots/playspare-monthly-projection.png" alt="Month projection panel and monthly achievement table" loading="lazy">
+          <span class="pbi-cap">Monthly projection &amp; achievement</span>
+        </button>
+        <button class="pbi-thumb" type="button">
+          <img src="assets/screenshots/playspare-target-vs-actual.png" alt="Quarterly target gauge and target vs actual profit/ROI chart" loading="lazy">
+          <span class="pbi-cap">Target vs actual</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="powerbi">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div>
+        <div class="section-tag">Also built in Power BI / 6 dashboards</div>
+        <h2 class="section-title">Power BI dashboards</h2>
+      </div>
+      <div class="section-note">
+        Click any screen to view it full size.
+      </div>
+    </div>
+
+    <div id="pbi-groups"></div>
+  </div>
+</section>
+
+<section class="section alt" id="about">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div>
+        <div class="section-tag">About</div>
+        <h2 class="section-title">Data Analyst &amp; BI Specialist</h2>
+        <div class="about-sub">SQL · Excel · Python · UI/UX Dashboards</div>
+      </div>
+    </div>
+    <div class="about-grid">
+      <div class="portrait reveal">
+        <img src="profile.jpg" alt="Muhammad Zair, Data Analyst">
+        <div class="portrait-tag"><span class="pt-dot"></span>Muhammad Zair · Data Analyst</div>
+      </div>
+      <div class="reveal">
+        <span class="cert"><span class="cert-mark"></span>Microsoft Certified · Power BI Data Analyst</span>
+        <p>I'm <strong>Muhammad Zair</strong>, a Data Analyst with 3+ years of experience combining
+        technical analytics with business and financial understanding. I hold a
+        <strong>BSc (Hons) in Accounting &amp; Finance from LUMS</strong> and specialize in
+        <strong>data analysis, business intelligence, and reporting automation</strong> — helping
+        teams make smarter decisions through clean, interactive, and user-centric dashboards.</p>
+        <p>My work combines technical depth with design thinking: every report is not only accurate
+        but intuitive and visually engaging, built with <strong>UI/UX logic</strong> in mind so the
+        person reading it can act without a manual. I've worked across the
+        <strong>gaming and tech</strong> space, handling large event datasets on player behaviour,
+        retention, and monetization — so alongside corporate BI I also build gaming-specific
+        analytics.</p>
+        <p>On the <strong>business intelligence</strong> side, I work across SQL, Python, Power BI,
+        Tableau, and Metabase to extract, model, and report on data — building
+        KPI dashboards and weekly/monthly reports that are automated end to end. On the
+        <strong>data visualization</strong> side, I choose the right chart, layout, and interaction
+        so trends and outliers stand out immediately. I've also worked with
+        <strong>data engineering teams to develop ETL</strong> and integrate multiple data sources,
+        and I investigate discrepancies between platforms to keep reporting trustworthy.</p>
+        <p>Beyond Power BI, I build <strong>interactive HTML dashboards</strong> (custom web reports
+        and D3 visuals for when off-the-shelf tools aren't enough) and automate the repetitive parts
+        of reporting with Excel VBA, Power Automate, and Python — so the numbers stay fresh without
+        manual rebuilds. My time in gaming and tech, and at Atheneum, where I worked on
+        financial reporting, invoicing, contracts, and targets/bonuses, gives me a strong
+        business lens on the numbers.</p>
+      </div>
+    </div>
+
+    <div class="skills-band reveal">
+      <div class="skills-block">
+        <div class="skills-title">Core skills</div>
+        <div class="chip-row">
+          <span class="chip">Data Visualization</span><span class="chip">Dashboard Design &amp; UX</span>
+          <span class="chip">SQL Data Modeling &amp; ETL</span><span class="chip">Workflow Automation</span>
+          <span class="chip">KPI Tracking</span><span class="chip">Executive Reporting</span>
+          <span class="chip">A/B Testing</span><span class="chip">Data Storytelling</span>
+          <span class="chip">Reporting Automation</span><span class="chip">Data Quality &amp; Reconciliation</span>
+          <span class="chip">Financial Reporting</span><span class="chip">Stakeholder Management</span>
+        </div>
+        <div class="skills-title">Tools</div>
+        <div class="chip-row">
+          <span class="chip">Power BI</span><span class="chip">Tableau</span><span class="chip">Looker</span>
+          <span class="chip">Excel / VBA</span><span class="chip">Python</span><span class="chip">SQL</span>
+          <span class="chip">DAX</span><span class="chip">Power Automate</span><span class="chip">Pandas</span>
+          <span class="chip">Metabase</span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="subhead reveal"><span class="subhead-tag">// Experience highlights</span></div>
+    <div class="build-grid">
+      <div class="build-item reveal"><div class="build-name">Data Analytics &amp; BI</div><div class="build-desc">Hands-on with SQL, Python, Power BI, Excel, Tableau, and Metabase for extraction, analysis, dashboards, and reporting.</div></div>
+      <div class="build-item reveal"><div class="build-name">Reporting &amp; Automation</div><div class="build-desc">Built and automated weekly/monthly reports and KPI dashboards, cutting manual work and improving reliability.</div></div>
+      <div class="build-item reveal"><div class="build-name">ETL &amp; Cross-Team Collaboration</div><div class="build-desc">Worked with data engineering teams to develop ETL and integrate multiple data sources.</div></div>
+      <div class="build-item reveal"><div class="build-name">Data Quality &amp; Reconciliation</div><div class="build-desc">Investigated discrepancies between platforms, validated and reconciled data, and traced issues in collection and tracking.</div></div>
+      <div class="build-item reveal"><div class="build-name">Product &amp; Experiment Analytics</div><div class="build-desc">Analyzed A/B tests, user behavior, acquisition data, and product KPIs, including Firebase Remote Config experiments.</div></div>
+      <div class="build-item reveal"><div class="build-name">Business &amp; Financial Analytics</div><div class="build-desc">Financial reporting, invoicing, contracts, targets/bonuses, and cross-functional stakeholder management, including at Atheneum.</div></div>
+    </div>
+
+    <div class="subhead reveal"><span class="subhead-tag">// Education &amp; certification</span></div>
+    <div class="build-grid">
+      <div class="build-item reveal"><div class="build-name">BSc (Hons) Accounting &amp; Finance</div><div class="build-desc">Lahore University of Management Sciences (LUMS), 2023.</div></div>
+      <div class="build-item reveal"><div class="build-name">Microsoft Certified: Power BI Data Analyst</div><div class="build-desc">Certified in data modeling, DAX, and report design in Power BI.</div></div>
+    </div>
+
+    <div class="subhead reveal"><span class="subhead-tag">// Dashboards I've built</span></div>
+    <div class="build-grid">
+      <div class="build-item reveal"><div class="build-name">Sales &amp; Revenue</div><div class="build-desc">Revenue trends, product-line analysis, regional breakdowns.</div></div>
+      <div class="build-item reveal"><div class="build-name">Ecommerce &amp; Retail</div><div class="build-desc">Funnels, conversion, basket size, customer lifetime value.</div></div>
+      <div class="build-item reveal"><div class="build-name">Financial Reporting</div><div class="build-desc">Budget vs actuals, cost-center analysis, profitability.</div></div>
+      <div class="build-item reveal"><div class="build-name">Marketing &amp; Growth</div><div class="build-desc">Campaign performance, acquisition, and retention cohorts.</div></div>
+      <div class="build-item reveal"><div class="build-name">HR &amp; People Analytics</div><div class="build-desc">Headcount, turnover, diversity &amp; recruitment metrics.</div></div>
+      <div class="build-item reveal"><div class="build-name">Operations &amp; Supply Chain</div><div class="build-desc">Inventory, order fulfillment, delivery performance.</div></div>
+      <div class="build-item reveal"><div class="build-name">Gaming Analytics</div><div class="build-desc">Player retention, monetization, and LiveOps events.</div></div>
+      <div class="build-item reveal"><div class="build-name">Executive Dashboards</div><div class="build-desc">High-level KPIs for strategic decision-making.</div></div>
+      <div class="build-item reveal"><div class="build-name">Interactive HTML Reports</div><div class="build-desc">Custom web &amp; D3 dashboards beyond off-the-shelf BI tools.</div></div>
+    </div>
+
+    <div class="subhead reveal"><span class="subhead-tag">// How I work</span></div>
+    <div class="process">
+      <div class="step reveal"><div class="step-num">01</div><div class="step-title">Frame the question</div><div class="step-desc">Start from the decision someone needs to make, not the dataset.</div></div>
+      <div class="step reveal"><div class="step-num">02</div><div class="step-title">Pull &amp; validate</div><div class="step-desc">Query the raw data, sanity-check against known numbers before trusting anything.</div></div>
+      <div class="step reveal"><div class="step-num">03</div><div class="step-title">Design for the reader</div><div class="step-desc">Lay it out with UI/UX logic so the insight is obvious at a glance.</div></div>
+      <div class="step reveal"><div class="step-num">04</div><div class="step-title">Ship a recommendation</div><div class="step-desc">Every report ends with a call, not just a chart.</div></div>
+    </div>
+
+    <div class="subhead reveal"><span class="subhead-tag">// What I bring to a team</span></div>
+    <div class="why-grid">
+      <div class="why-item reveal"><span class="why-check">✓</span><span>Microsoft-certified Power BI skills, backed by real project work</span></div>
+      <div class="why-item reveal"><span class="why-check">✓</span><span>3+ years across analytics, finance, gaming, and tech</span></div>
+      <div class="why-item reveal"><span class="why-check">✓</span><span>UI/UX-driven dashboards — insight that's clear at a glance</span></div>
+      <div class="why-item reveal"><span class="why-check">✓</span><span>Automation that keeps reports fresh, no manual rebuilds</span></div>
+      <div class="why-item reveal"><span class="why-check">✓</span><span>Clear communication and dependable, on-time delivery within a team</span></div>
+      <div class="why-item reveal"><span class="why-check">✓</span><span>Analysis that ends in a recommendation, not just charts</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="contact">
+  <div class="wrap">
+    <div class="contact-inner reveal">
+      <div>
+        <div class="section-tag">Contact</div>
+        <h2 class="section-title">Get in touch</h2>
+      </div>
+      <ul class="contact-list">
+        <li><span class="clabel">Email</span><a href="mailto:muhammadzairali1@gmail.com">muhammadzairali1@gmail.com</a></li>
+        <li><span class="clabel">Portfolio</span><a href="https://muhammadzairdata.github.io/portfolio" target="_blank" rel="noopener noreferrer">muhammadzairdata.github.io/portfolio</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Muhammad Zair</span><span>Data Analyst · Power BI · SQL · Python</span>
+  </div>
+</footer>
+
+<div id="lightbox">
+  <button class="lb-close" id="lb-close">Close ✕</button>
+  <button class="lb-nav lb-prev" id="lb-prev">←</button>
+  <img id="lb-img" src="" alt="">
+  <button class="lb-nav lb-next" id="lb-next">→</button>
+  <div class="lb-cap" id="lb-cap"></div>
+</div>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- fallback UI for a report card thumbnail that hasn't been added yet ---------- */
+  window.cardThumbFallback = function(img){
+    var wrap = img.parentElement;
+    var heights = [38,64,50,78,58,88,66,46];
+    var bars = heights.map(function(h){ return '<i style="height:'+h+'%"></i>'; }).join('');
+    wrap.innerHTML = '<div class="pbi-fallback">' +
+      '<div class="fb-top"><span>REPORT</span></div>' +
+      '<div class="fb-bars">' + bars + '</div>' +
+      '<div class="fb-label"><b>Preview pending</b>thumbnail not yet added</div>' +
+      '</div>';
+  };
+
+  /* ---------- animated KPI counters ---------- */
+  function animateCount(el){
+    var target = parseInt(el.getAttribute('data-count'), 10);
+    var out = el.querySelector('.num') || el;
+    if(reduceMotion){ out.textContent = target; return; }
+    var start = null, dur = 1100;
+    function tick(ts){
+      if(!start) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      out.textContent = Math.round(target * eased);
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------- draw hero sparklines ---------- */
+  function drawSpark(svg){
+    var pts = svg.getAttribute('data-spark');
+    var ns = 'http://www.w3.org/2000/svg';
+    var poly = document.createElementNS(ns, 'polyline');
+    poly.setAttribute('points', pts);
+    poly.setAttribute('fill', 'none');
+    poly.setAttribute('stroke', 'var(--cyan)');
+    poly.setAttribute('stroke-width', '2');
+    poly.setAttribute('stroke-linecap', 'round');
+    poly.setAttribute('stroke-linejoin', 'round');
+    poly.setAttribute('vector-effect', 'non-scaling-stroke');
+    svg.appendChild(poly);
+    // end dot
+    var last = pts.trim().split(' ').pop().split(',');
+    var dot = document.createElementNS(ns, 'circle');
+    dot.setAttribute('cx', last[0]); dot.setAttribute('cy', last[1]); dot.setAttribute('r', '2.6');
+    dot.setAttribute('fill', 'var(--cyan)');
+    svg.appendChild(dot);
+    if(!reduceMotion){
+      var len = 220;
+      poly.style.strokeDasharray = len; poly.style.strokeDashoffset = len;
+      poly.style.transition = 'stroke-dashoffset 1.1s ease .15s';
+      requestAnimationFrame(function(){ poly.style.strokeDashoffset = 0; });
+    }
+  }
+
+  /* ---------- scroll reveal ---------- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(function(el, i){
+    el.style.transitionDelay = Math.min(i * 40, 240) + 'ms';
+    io.observe(el);
+  });
+
+  window.addEventListener('load', function(){
+    document.querySelectorAll('[data-count]').forEach(animateCount);
+    document.querySelectorAll('[data-spark]').forEach(drawSpark);
+    // draw-in hero chart lines
+    var lines = document.querySelectorAll('.hv-line');
+    lines.forEach(function(ln, i){
+      var len = ln.getTotalLength();
+      if(reduceMotion){ return; }
+      ln.style.strokeDasharray = len;
+      ln.style.strokeDashoffset = len;
+      ln.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(.25,.9,.3,1) ' + (0.15 + i*0.18) + 's';
+      requestAnimationFrame(function(){ ln.style.strokeDashoffset = 0; });
+    });
+    var area = document.querySelector('.hv-area');
+    if(area && !reduceMotion){
+      area.style.opacity = 0; area.style.transition = 'opacity 1s ease .5s';
+      requestAnimationFrame(function(){ area.style.opacity = 1; });
+    }
+  });
+
+  /* ---------- Power BI gallery ---------- */
+  var groups = [
+    { name: "Sales Analysis Report", items: [
+      { src: "assets/pbi/sales-analysis-home.jpg", label: "Home" },
+      { src: "assets/pbi/sales-analysis-period.jpg", label: "Period breakdown" }
+    ]},
+    { name: "HR Dashboard", items: [
+      { src: "assets/pbi/hr-dashboard-cover.jpg", label: "Overview" },
+      { src: "assets/pbi/hr-dashboard-headcount.jpg", label: "Headcount figures" },
+      { src: "assets/pbi/hr-dashboard-retention.jpg", label: "Retention figures" },
+      { src: "assets/pbi/hr-dashboard-turnover.jpg", label: "Turnover figures" }
+    ]},
+    { name: "Shopify — Sales & Customer Funnel", items: [
+      { src: "assets/pbi/shopify-funnel-overview.jpg", label: "Overview" },
+      { src: "assets/pbi/shopify-funnel-details.jpg", label: "Order details" }
+    ]},
+    { name: "Festman Studio — Profitability", items: [
+      { src: "assets/pbi/festman-studio-overview.jpg", label: "Overview" },
+      { src: "assets/pbi/festman-studio-profitability.jpg", label: "Profitability analysis" },
+      { src: "assets/pbi/festman-studio-product-insights.jpg", label: "Product insights" }
+    ]},
+    { name: "Adventure Works Cycles", items: [
+      { src: "assets/pbi/adventure-works-executive.jpg", label: "Executive overview" },
+      { src: "assets/pbi/adventure-works-product-detail.jpg", label: "Product detail" },
+      { src: "assets/pbi/adventure-works-customer.jpg", label: "Customer insights" }
+    ]},
+    { name: "MD Ecommerce Sales Dashboard", items: [
+      { src: "assets/pbi/md-ecommerce-dashboard.jpg", label: "Overview" }
+    ]}
+  ];
+
+  var container = document.getElementById('pbi-groups');
+  var flat = [];
+
+  function pad(n){ return n < 10 ? '0' + n : '' + n; }
+
+  // build a graceful placeholder when a screenshot file is missing
+  function buildFallback(name, label){
+    var bars = '';
+    var heights = [42, 68, 55, 80, 60, 90, 72];
+    for(var i=0;i<heights.length;i++){ bars += '<i style="height:'+heights[i]+'%"></i>'; }
+    return '<div class="pbi-fallback">' +
+             '<div class="fb-top"><span>'+name+'</span><span class="fb-chip">PBIX</span></div>' +
+             '<div class="fb-bars">'+bars+'</div>' +
+             '<div class="fb-label"><b>'+label+'</b>screenshot pending</div>' +
+           '</div>';
+  }
+
+  groups.forEach(function(g, gi){
+    var wrap = document.createElement('div');
+    wrap.className = 'pbi-group reveal';
+    var head = document.createElement('div');
+    head.className = 'pbi-group-head';
+    head.innerHTML = '<span class="pbi-num">DASHBOARD_' + pad(gi + 1) + '</span><span class="pbi-name">' + g.name + '</span>';
+    wrap.appendChild(head);
+
+    var grid = document.createElement('div');
+    grid.className = 'pbi-grid';
+
+    g.items.forEach(function(item){
+      var idx = flat.length;
+      flat.push({ src: item.src, cap: g.name + ' — ' + item.label });
+
+      var a = document.createElement('button');
+      a.className = 'pbi-thumb';
+      a.setAttribute('data-idx', idx);
+
+      var img = document.createElement('img');
+      img.alt = item.label;
+      img.loading = 'lazy';
+      // if the screenshot is missing, replace the box with a styled placeholder
+      img.onerror = function(){
+        a.innerHTML = buildFallback(g.name, item.label);
+        a.style.cursor = 'default';
+        a.setAttribute('data-missing', '1');
+      };
+      img.src = item.src;
+
+      var cap = document.createElement('span');
+      cap.className = 'pbi-cap';
+      cap.textContent = item.label;
+
+      a.appendChild(img);
+      a.appendChild(cap);
+      a.addEventListener('click', function(){
+        if(a.getAttribute('data-missing')) return; // nothing to zoom into yet
+        openLightbox(idx);
+      });
+      grid.appendChild(a);
+    });
+
+    wrap.appendChild(grid);
+    container.appendChild(wrap);
+    io.observe(wrap);
+  });
+
+  /* ---------- extra inline screenshots (Playspare — custom HTML dashboard) ---------- */
+  var extraShots = [
+    { src: 'assets/screenshots/playspare-daily-overview.png', cap: 'UA & Revenue Dashboard — Daily overview' },
+    { src: 'assets/screenshots/playspare-monthly-projection.png', cap: 'UA & Revenue Dashboard — Monthly projection & achievement' },
+    { src: 'assets/screenshots/playspare-target-vs-actual.png', cap: 'UA & Revenue Dashboard — Target vs actual' }
+  ];
+  document.querySelectorAll('#extra-shots .pbi-thumb').forEach(function(btn, i){
+    var idx = flat.length;
+    flat.push(extraShots[i]);
+    btn.addEventListener('click', function(){ openLightbox(idx); });
+  });
+
+  /* ---------- lightbox ---------- */
+  var lightbox = document.getElementById('lightbox');
+  var lbImg = document.getElementById('lb-img');
+  var lbCap = document.getElementById('lb-cap');
+  var current = 0;
+
+  function openLightbox(idx){ current = idx; render(); lightbox.classList.add('active'); }
+  function render(){
+    lbImg.src = flat[current].src;
+    lbCap.textContent = flat[current].cap + '  ·  ' + (current + 1) + ' / ' + flat.length;
+  }
+  function closeLightbox(){ lightbox.classList.remove('active'); }
+  function next(){ current = (current + 1) % flat.length; render(); }
+  function prev(){ current = (current - 1 + flat.length) % flat.length; render(); }
+
+  document.getElementById('lb-close').addEventListener('click', closeLightbox);
+  document.getElementById('lb-next').addEventListener('click', next);
+  document.getElementById('lb-prev').addEventListener('click', prev);
+  lightbox.addEventListener('click', function(e){ if(e.target === lightbox){ closeLightbox(); } });
+  document.addEventListener('keydown', function(e){
+    if(!lightbox.classList.contains('active')) return;
+    if(e.key === 'Escape') closeLightbox();
+    if(e.key === 'ArrowRight') next();
+    if(e.key === 'ArrowLeft') prev();
+  });
+})();
+</script>
+
+</body>
+</html>

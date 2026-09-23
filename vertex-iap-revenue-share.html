@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vertex — IAP Revenue Share Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#000000;--bg2:#080a0e;--card:#0b0c0f;--card2:#070809;
+    --glass:rgba(9,10,13,.9);--border:rgba(255,255,255,.08);--borderB:rgba(255,255,255,.14);
+    --t1:#edf2ff;--t2:#7a8fad;--t3:#3d5070;
+    --teal:#00e5c3;--tealD:rgba(0,229,195,.14);
+    --blue:#4d9fff;--blueD:rgba(77,159,255,.14);
+    --amber:#ffb800;--amberD:rgba(255,184,0,.14);
+    --coral:#ff4d6d;--coralD:rgba(255,77,109,.14);
+    --green:#00c47a;--greenD:rgba(0,196,122,.14);
+    --r:14px;--rs:8px;
+    --sh:0 8px 40px rgba(0,0,0,.6);--shs:0 3px 16px rgba(0,0,0,.4);
+    --grad:linear-gradient(135deg, var(--teal), var(--blue));
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{overflow-x:hidden;}
+  body{
+    font-family:'Poppins',sans-serif;
+    background:var(--bg);
+    color:var(--t1);
+    min-height:100vh;
+    padding-bottom:60px;
+    overflow-x:hidden;
+  }
+  header{
+    position:sticky;top:0;z-index:10;
+    background:var(--glass);backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
+    padding:18px 32px;
+    display:flex;align-items:center;gap:14px;
+  }
+  header h1{
+    font-family:'Poppins',sans-serif;font-weight:700;font-size:20px;letter-spacing:.01em;
+    background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  header .sub{font-size:12px;color:var(--t3);margin-left:2px;font-family:'Poppins',sans-serif;}
+  .wrap{max-width:1800px;margin:0 auto;padding:34px 40px 60px;}
+  .filters{
+    display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--r);
+    padding:18px 20px;
+    margin-bottom:24px;
+    box-shadow:var(--shs);
+  }
+  .field{display:flex;flex-direction:column;gap:6px;min-width:220px;flex:1;}
+  .field label{font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);}
+  select{
+    background:var(--card2);
+    color:var(--t1);
+    border:1px solid var(--borderB);
+    border-radius:var(--rs);
+    padding:9px 10px;
+    font-family:'Poppins',sans-serif;
+    font-size:13px;
+    outline:none;
+  }
+  select:focus{border-color:var(--teal);}
+  .combo{position:relative;}
+  .combo-input{
+    width:100%;
+    background:var(--card2);
+    color:var(--t1);
+    border:1px solid var(--borderB);
+    border-radius:var(--rs);
+    padding:9px 10px;
+    font-family:'Poppins',sans-serif;
+    font-size:13px;
+    outline:none;
+  }
+  .combo-input:focus{border-color:var(--teal);}
+  .combo-list{
+    display:none;
+    position:absolute;
+    top:calc(100% + 6px);
+    left:0;right:0;
+    max-height:280px;
+    overflow-y:auto;
+    background:var(--card2);
+    border:1px solid var(--borderB);
+    border-radius:var(--rs);
+    box-shadow:var(--sh);
+    z-index:20;
+  }
+  .combo-list.open{display:block;}
+  .combo-item{
+    padding:9px 12px;
+    font-size:13px;
+    color:var(--t1);
+    cursor:pointer;
+    border-bottom:1px solid var(--border);
+  }
+  .combo-item:last-child{border-bottom:none;}
+  .combo-item:hover,.combo-item.hl{background:var(--tealD);color:var(--teal);}
+  .combo-empty{padding:10px 12px;font-size:12.5px;color:var(--t3);}
+  .tabs{display:flex;gap:6px;}
+  .tab-btn{
+    background:var(--card2);
+    border:1px solid var(--borderB);
+    color:var(--t2);
+    font-family:'Poppins',sans-serif;
+    padding:9px 16px;
+    border-radius:var(--rs);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .tab-btn:hover{border-color:var(--teal);color:var(--teal);}
+  .tab-btn.active{background:var(--grad);color:#020d1a;border-color:transparent;box-shadow:0 4px 22px rgba(0,229,195,.26);}
+  .chart-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--r);
+    padding:20px;
+    margin-bottom:24px;
+    box-shadow:var(--shs);
+  }
+  .chart-card h2{font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;margin:0 0 14px;}
+  .chart-wrap{position:relative;height:420px;}
+  .chart-wrap svg{width:100%;height:100%;overflow:visible;font-family:'DM Mono',monospace;}
+  .grid-line{stroke:var(--border);stroke-width:1;}
+  .axis-label{fill:var(--t3);font-size:11px;}
+  .axis-title{fill:var(--t2);font-size:12px;}
+  .data-line{fill:none;stroke:var(--blue);stroke-width:2.5;}
+  .data-area{fill:url(#areaGrad);opacity:.5;}
+  .data-point{fill:var(--teal);stroke:var(--bg);stroke-width:1.5;cursor:pointer;}
+  .data-point:hover{fill:var(--blue);}
+  .tooltip-box{
+    position:absolute;pointer-events:none;background:var(--card2);border:1px solid var(--teal);
+    border-radius:var(--rs);padding:8px 10px;font-size:12px;color:var(--t1);font-family:'DM Mono',monospace;
+    transform:translate(-50%,-115%);white-space:nowrap;opacity:0;transition:opacity .1s;
+    box-shadow:var(--sh);z-index:5;
+  }
+  .tooltip-box.show{opacity:1;}
+  .tooltip-box .t-label{color:var(--t3);font-size:10px;margin-bottom:2px;}
+  .pie-wrap{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;}
+  .pie-svg-wrap{position:relative;flex:0 0 340px;height:340px;}
+  .pie-svg-wrap svg{width:100%;height:100%;}
+  .pie-slice{stroke:none;cursor:pointer;transition:transform .15s,filter .15s;transform-origin:center;transform-box:fill-box;}
+  .pie-slice:hover{filter:brightness(1.15);transform:scale(1.03);}
+  .pie-center-label{font-family:'DM Mono',monospace;}
+  .pie-center-total{fill:var(--t1);font-size:20px;font-weight:600;}
+  .pie-center-caption{fill:var(--t3);font-size:10px;text-transform:uppercase;letter-spacing:.06em;}
+  .legend{flex:1;min-width:260px;max-height:340px;overflow-y:auto;font-size:12.5px;}
+  .legend-row{display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);}
+  .legend-row .swatch{width:10px;height:10px;border-radius:3px;flex:0 0 10px;}
+  .legend-row .lname{flex:1;color:var(--t1);}
+  .legend-row .lval{font-family:'DM Mono',monospace;color:var(--t2);font-variant-numeric:tabular-nums;}
+  .foot{color:var(--t3);font-size:11px;margin-top:30px;text-align:center;font-family:'DM Mono',monospace;}
+
+  .exec{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--r);
+    padding:22px 24px;
+    margin-bottom:24px;
+    box-shadow:var(--shs);
+  }
+  .exec h2{font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;margin:0 0 16px;}
+  .exec-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px;}
+  .exec-stat{background:var(--card2);border:1px solid var(--border);border-radius:var(--rs);padding:14px 16px;min-width:0;overflow-wrap:break-word;}
+  .exec-stat .k{font-family:'DM Mono',monospace;font-size:10.5px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+  .exec-stat .v{font-family:'DM Mono',monospace;font-size:20px;font-weight:600;color:var(--t1);}
+  .exec-stat .v.up{color:var(--green);}
+  .exec-stat .v.down{color:var(--coral);}
+  .exec-stat .sub{font-size:11px;color:var(--t2);margin-top:4px;}
+  .exec-findings{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+  .exec-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--rs);padding:14px 16px;min-width:0;overflow-wrap:break-word;}
+  .exec-card .tag{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:20px;margin-bottom:8px;}
+  .exec-card .tag.teal{background:var(--tealD);color:var(--teal);}
+  .exec-card .tag.blue{background:var(--blueD);color:var(--blue);}
+  .exec-card .tag.amber{background:var(--amberD);color:var(--amber);}
+  .exec-card .tag.coral{background:var(--coralD);color:var(--coral);}
+  .exec-card p{font-size:12.5px;color:var(--t2);line-height:1.55;}
+  .exec-card b{color:var(--t1);}
+</style>
+</head>
+<body>
+<header>
+  <h1>vertex</h1>
+  <div class="sub">· IAP Revenue Share Report</div>
+</header>
+
+<div class="wrap">
+
+  <div class="exec">
+    <h2>Executive Summary</h2>
+
+    <div class="exec-stats">
+      <div class="exec-stat">
+        <div class="k">Weekend uplift — Android</div>
+        <div class="v up">+18.7%</div>
+        <div class="sub">$6,708/day weekend vs $5,650/day weekday</div>
+      </div>
+      <div class="exec-stat">
+        <div class="k">Weekend uplift — iOS</div>
+        <div class="v up">+21.5%</div>
+        <div class="sub">$22,063/day weekend vs $18,154/day weekday</div>
+      </div>
+      <div class="exec-stat">
+        <div class="k">Android weekday trend</div>
+        <div class="v up">+3.7%</div>
+        <div class="sub">first 3 weeks avg → last 3 weeks avg</div>
+      </div>
+      <div class="exec-stat">
+        <div class="k">iOS weekday trend</div>
+        <div class="v down">−18.7%</div>
+        <div class="sub">$100.6K → $81.7K avg, first 3 vs last 3 weeks</div>
+      </div>
+      <div class="exec-stat">
+        <div class="k">iOS weekend trend</div>
+        <div class="v down">−11.1%</div>
+        <div class="sub">$47.9K → $42.6K avg, first 3 vs last 3 weeks</div>
+      </div>
+      <div class="exec-stat">
+        <div class="k">iOS core (non-seasonal) trend</div>
+        <div class="v down">−33.0%</div>
+        <div class="sub">$93.7K → $62.8K avg, excluding event bundles</div>
+      </div>
+    </div>
+
+    <div class="exec-findings">
+      <div class="exec-card">
+        <span class="tag teal">Weekend behavior</span>
+        <p>Players spend more per day on weekends on <b>both platforms</b> (+18.7% Android, +21.5% iOS). Weekend-specific promos look like a high-leverage lever.</p>
+      </div>
+      <div class="exec-card">
+        <span class="tag teal">Core monetization</span>
+        <p><b>Remove Ads</b> and the <b>Pro/Elite pass bundles</b> are the top earners on both platforms — the real monetization backbone, ahead of any cash or energy pack.</p>
+      </div>
+      <div class="exec-card">
+        <span class="tag coral">Diverging trend</span>
+        <p>Android weekday revenue is flat-to-up (+3.7%), while <b>iOS weekday revenue is down 18.7%</b> over the same window.</p>
+      </div>
+      <div class="exec-card">
+        <span class="tag coral">Why iOS weekdays are declining</span>
+        <p>The drop is <b>broad-based</b> — 27 of 40 iOS IAPs declined. Excluding seasonal bundles, the <b>core catalog is down 33.0%</b>, worse than the headline number — Summer Pass 2026 is currently masking a steeper underlying decline.</p>
+      </div>
+      <div class="exec-card">
+        <span class="tag amber">Leading decliners</span>
+        <p>Drop in weekly average revenue (first-3-week avg → last-3-week avg): <b>Winter Pass 2025</b> −$6,074, <b>$2750 Cash Bundle</b> −$3,620, <b>Manager Pass Pro + Elite</b> −$3,318, <b>500 Energy Bundle</b> −$2,754, <b>Starter Pack</b> −$2,436 — top 5 alone account for <b>49% of all decline</b>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="field" style="flex:0 0 auto;">
+      <label>Platform</label>
+      <div class="tabs">
+        <button class="tab-btn active" data-platform="android">Android</button>
+        <button class="tab-btn" data-platform="ios">iOS</button>
+      </div>
+    </div>
+    <div class="field" style="flex:0 0 auto;">
+      <label>Period</label>
+      <div class="tabs">
+        <button class="tab-btn active" data-period="weekdays">Weekdays</button>
+        <button class="tab-btn" data-period="weekends">Weekends</button>
+        <button class="tab-btn" data-period="combined">Combined</button>
+      </div>
+    </div>
+    <div class="field" style="position:relative;">
+      <label>IAP Product</label>
+      <div class="combo" id="productCombo">
+        <input type="text" id="productSearch" class="combo-input" autocomplete="off" placeholder="Search IAP…">
+        <div class="combo-list" id="productList"></div>
+      </div>
+    </div>
+    <div class="field" style="flex:0 0 160px;">
+      <label>Metric</label>
+      <select id="metricSelect">
+        <option value="share">Revenue Share (%)</option>
+        <option value="revenue">Revenue (USD)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px;">
+      <h2 id="chartTitle" style="margin:0;">Revenue share by week</h2>
+      <div id="chartLegend" style="display:none;gap:16px;font-family:'DM Mono',monospace;font-size:11px;color:var(--t2);"></div>
+    </div>
+    <div class="chart-wrap" id="chartWrap">
+      <svg id="mainChart"></svg>
+      <div class="tooltip-box" id="tooltip"></div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:14px;">
+      <h2 id="pieTitle" style="margin:0;">Revenue share by IAP</h2>
+      <div class="field" style="flex:0 0 220px;min-width:200px;">
+        <label>Week</label>
+        <select id="weekSelect"></select>
+      </div>
+    </div>
+    <div class="pie-wrap">
+      <div class="pie-svg-wrap" id="pieWrap">
+        <svg id="pieChart"></svg>
+        <div class="tooltip-box" id="pieTooltip"></div>
+      </div>
+      <div class="legend" id="pieLegend"></div>
+    </div>
+  </div>
+
+  <div class="foot">Revenue share = item revenue / total revenue for that period's cohort of weeks. iOS weekly totals are aggregated from daily sales figures using the same weekday/weekend date ranges as Android.</div>
+</div>
+
+<script>
+const DATA = {"android":{"weekdays":{"labels":["May 4–8","May 11–15","May 18–22","May 25–29","Jun 1–5","Jun 8–12","Jun 15–19","Jun 22–26","Jun 29–Jul 3","Jul 6–10","Jul 13–17"],"totals":[28734.94,28685.04,29819.54,27383.65,25650.02,31433.38,30061.67,29607.64,26193.83,28278.72,30178.06],"products":["com.vertex.kaleido.store.simulator.coin_100","com.vertex.kaleido.store.simulator.coin_1100","com.vertex.kaleido.store.simulator.coin_20000","com.vertex.kaleido.store.simulator.coin_2750","com.vertex.kaleido.store.simulator.coin_500v2","com.vertex.kaleido.store.simulator.coin_8000","com.vertex.kaleido.store.simulator.discount30silenceads","com.vertex.kaleido.store.simulator.discount30rookiepack","com.vertex.kaleido.store.simulator.discount50silenceads","com.vertex.kaleido.store.simulator.fuel_100","com.vertex.kaleido.store.simulator.fuel_10000","com.vertex.kaleido.store.simulator.fuel_1000v2","com.vertex.kaleido.store.simulator.fuel_2250","com.vertex.kaleido.store.simulator.fuel_500","com.vertex.kaleido.store.simulator.fuel_5000","com.vertex.kaleido.store.simulator.msb_id_can_founders","com.vertex.kaleido.store.simulator.msb_id_can_founders_discounted","com.vertex.kaleido.store.simulator.msb_id_harvest_festival","com.vertex.kaleido.store.simulator.msb_id_harvest_festival_discounted","com.vertex.kaleido.store.simulator.msb_id_usa_founders","com.vertex.kaleido.store.simulator.msb_id_usa_founders_discounted","com.vertex.kaleido.store.simulator.direlite","com.vertex.kaleido.store.simulator.dirpro","com.vertex.kaleido.store.simulator.dirproelite","com.vertex.kaleido.store.simulator.deluxe_shelving_offer","com.vertex.kaleido.store.simulator.silenceads","com.vertex.kaleido.store.simulator.momentum_offer_step_10","com.vertex.kaleido.store.simulator.momentum_offer_step_14","com.vertex.kaleido.store.simulator.momentum_offer_step_18","com.vertex.kaleido.store.simulator.momentum_offer_step_2","com.vertex.kaleido.store.simulator.momentum_offer_step_22","com.vertex.kaleido.store.simulator.momentum_offer_step_26","com.vertex.kaleido.store.simulator.momentum_offer_step_6","com.vertex.kaleido.store.simulator.rookiepack","com.vertex.kaleido.store.simulator.solsticepass26","com.vertex.kaleido.store.simulator.elite_surge_event","com.vertex.kaleido.store.simulator.elite_surge_event_discounted","com.vertex.kaleido.store.simulator.vipinsiderbundle","com.vertex.kaleido.store.simulator.frostfallpass25"],"series":{"com.vertex.kaleido.store.simulator.coin_100":{"revenue":[300.44,191.11,157.65,242.04,161.82,163.33,222.84,344.51,241.91,272.74,327.45],"share":[1.046,0.666,0.529,0.884,0.631,0.52,0.741,1.164,0.924,0.964,1.085]},"com.vertex.kaleido.store.simulator.coin_1100":{"revenue":[527.15,505.26,657.13,527.61,581.24,594.88,858.95,1153.06,808.24,1005.14,1133.93],"share":[1.835,1.761,2.204,1.927,2.266,1.893,2.857,3.894,3.086,3.554,3.757]},"com.vertex.kaleido.store.simulator.coin_20000":{"revenue":[851.63,1159.42,1362.22,894.37,1146.27,1764.24,1145.79,1221.6,1046.19,1234.84,1510.62],"share":[2.964,4.042,4.568,3.266,4.469,5.613,3.811,4.126,3.994,4.367,5.006]},"com.vertex.kaleido.store.simulator.coin_2750":{"revenue":[1149.13,1687.19,1398.84,1479.68,908.71,1305.73,2297.65,2267.59,2307.28,2897.42,2416.86],"share":[3.999,5.882,4.691,5.404,3.543,4.154,7.643,7.659,8.808,10.246,8.009]},"com.vertex.kaleido.store.simulator.coin_500v2":{"revenue":[757.84,766.91,606.98,527.74,522.61,633.34,704.19,933.9,765.53,879.81,984.22],"share":[2.637,2.674,2.036,1.927,2.037,2.015,2.342,3.154,2.923,3.111,3.261]},"com.vertex.kaleido.store.simulator.coin_8000":{"revenue":[973.0,1217.6,831.8,1208.68,851.49,531.96,812.66,980.39,1426.95,1498.33,1842.97],"share":[3.386,4.245,2.789,4.414,3.32,1.692,2.703,3.311,5.448,5.298,6.107]},"com.vertex.kaleido.store.simulator.discount30silenceads":{"revenue":[0,0,0,0,0,0,0,4.77,13.46,54.43,7.84],"share":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.016,0.051,0.192,0.026]},"com.vertex.kaleido.store.simulator.discount30rookiepack":{"revenue":[3.72,0,0,0,0,0,86.3,235.69,152.85,113.04,57.8],"share":[0.013,0.0,0.0,0.0,0.0,0.0,0.287,0.796,0.584,0.4,0.192]},"com.vertex.kaleido.store.simulator.discount50silenceads":{"revenue":[0,0,0,0,0,0,0,0,6.91,8.24,2.95],"share":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.026,0.029,0.01]},"com.vertex.kaleido.store.simulator.fuel_100":{"revenue":[1457.29,1573.9,1759.28,1275.32,1332.16,1072.64,1463.21,1766.54,1928.94,1416.61,2028.89],"share":[5.071,5.487,5.9,4.657,5.194,3.412,4.867,5.967,7.364,5.009,6.723]},"com.vertex.kaleido.store.simulator.fuel_10000":{"revenue":[386.08,157.98,140.11,52.5,0,198.15,223.51,182.75,168.9,137.75,0.61],"share":[1.344,0.551,0.47,0.192,0.0,0.63,0.744,0.617,0.645,0.487,0.002]},"com.vertex.kaleido.store.simulator.fuel_1000v2":{"revenue":[1264.41,1672.12,1519.38,1024.81,1359.33,1100.51,1855.74,1794.84,1757.15,1629.75,1313.14],"share":[4.4,5.829,5.095,3.742,5.3,3.501,6.173,6.062,6.708,5.763,4.351]},"com.vertex.kaleido.store.simulator.fuel_2250":{"revenue":[488.38,361.59,508.95,426.32,479.9,323.79,428.13,512.19,643.46,1038.29,758.87],"share":[1.7,1.261,1.707,1.557,1.871,1.03,1.424,1.73,2.457,3.672,2.515]},"com.vertex.kaleido.store.simulator.fuel_500":{"revenue":[1980.98,1565.97,1738.26,1394.9,1280.65,1102.89,2006.96,1886.02,2401.66,1613.76,1932.3],"share":[6.894,5.459,5.829,5.094,4.993,3.509,6.676,6.37,9.169,5.707,6.403]},"com.vertex.kaleido.store.simulator.fuel_5000":{"revenue":[162.21,493.75,127.8,322.13,265.13,239.74,106.23,281.79,263.66,235.57,393.31],"share":[0.565,1.721,0.429,1.176,1.034,0.763,0.353,0.952,1.007,0.833,1.303]},"com.vertex.kaleido.store.simulator.msb_id_can_founders":{"revenue":[0,0,106.57,0,0,0,0,0,0,0,0],"share":[0.0,0.0,0.357,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.msb_id_can_founders_discounted":{"revenue":[0,0,429.34,0,0,0,0,0,0,0,0],"share":[0.0,0.0,1.44,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.msb_id_harvest_festival":{"revenue":[0,0,0,0,0,5.03,0,1961.37,0,0,0],"share":[0.0,0.0,0.0,0.0,0.0,0.016,0.0,6.625,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.msb_id_harvest_festival_discounted":{"revenue":[0,0,0,0,0,0,-10.21,1475.28,0,0,0],"share":[0.0,0.0,0.0,0.0,0.0,0.0,-0.034,4.983,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.msb_id_usa_founders":{"revenue":[0,113.22,456.09,458.06,0,0,0,0,0,0,0],"share":[0.0,0.395,1.53,1.673,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.msb_id_usa_founders_discounted":{"revenue":[0,253.59,0,0,0,0,0,0,0,0,0],"share":[0.0,0.884,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.direlite":{"revenue":[1282.79,1076.61,1240.35,1020.84,1159.19,1093.73,1340.64,1209.4,1383.39,1547.65,1412.24],"share":[4.464,3.753,4.16,3.728,4.519,3.48,4.46,4.085,5.281,5.473,4.68]},"com.vertex.kaleido.store.simulator.dirpro":{"revenue":[1593.1,1727.61,1254.96,1260.49,1365.16,1118.69,1645.29,1682.98,1538.19,2215.01,1979.82],"share":[5.544,6.023,4.209,4.603,5.322,3.559,5.473,5.684,5.872,7.833,6.56]},"com.vertex.kaleido.store.simulator.dirproelite":{"revenue":[3300.06,3095.41,2482.48,3376.55,3314.95,3105.54,3014.14,2875.68,3374.27,3630.36,4351.17],"share":[11.484,10.791,8.325,12.331,12.924,9.88,10.027,9.713,12.882,12.838,14.418]},"com.vertex.kaleido.store.simulator.deluxe_shelving_offer":{"revenue":[1420.3,1296.61,1942.53,3088.57,2737.97,1915.1,0,0,0,0,0],"share":[4.943,4.52,6.514,11.279,10.674,6.093,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.silenceads":{"revenue":[2883.25,2904.57,2675.94,2393.61,2220.05,2673.26,3266.93,3116.14,2676.53,3341.75,3061.27],"share":[10.034,10.126,8.974,8.741,8.655,8.505,10.867,10.525,10.218,11.817,10.144]},"com.vertex.kaleido.store.simulator.momentum_offer_step_10":{"revenue":[0,0,0,0,572.11,1592.39,899.13,0,0,0,0],"share":[0.0,0.0,0.0,0.0,2.23,5.066,2.991,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.momentum_offer_step_14":{"revenue":[0,0,0,0,259.48,965.09,582.2,0,0,0,0],"share":[0.0,0.0,0.0,0.0,1.012,3.07,1.937,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.momentum_offer_step_18":{"revenue":[0,0,0,0,206.81,662.82,591.73,0,0,0,0],"share":[0.0,0.0,0.0,0.0,0.806,2.109,1.968,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.momentum_offer_step_2":{"revenue":[0,-0.08,2.44,3.27,1648.29,2343.93,1960.9,0,0,0,0],"share":[0.0,-0.0,0.008,0.012,6.426,7.457,6.523,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.momentum_offer_step_22":{"revenue":[0,0,0,0,46.45,507.1,480.11,0,0,0,0],"share":[0.0,0.0,0.0,0.0,0.181,1.613,1.597,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.momentum_offer_step_26":{"revenue":[0,0,0,0,0,389.56,344.61,0,0,0,0],"share":[0.0,0.0,0.0,0.0,0.0,1.239,1.146,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.momentum_offer_step_6":{"revenue":[-6.26,0,0,0,959.11,2742.38,1413.51,0,0,0,0],"share":[-0.022,0.0,0.0,0.0,3.739,8.724,4.702,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.rookiepack":{"revenue":[1986.39,1748.89,1754.73,1390.67,1717.65,1952.49,1395.61,2296.43,1815.83,1897.27,2092.03],"share":[6.913,6.097,5.884,5.078,6.696,6.212,4.642,7.756,6.932,6.709,6.932]},"com.vertex.kaleido.store.simulator.solsticepass26":{"revenue":[5451.84,4752.2,6467.37,4776.74,225.91,0,0,0,0,0,0],"share":[18.973,16.567,21.688,17.444,0.881,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.elite_surge_event":{"revenue":[132.41,100.85,80.49,121.18,147.86,101.34,182.69,234.63,142.93,103.55,32.57],"share":[0.461,0.352,0.27,0.443,0.576,0.322,0.608,0.792,0.546,0.366,0.108]},"com.vertex.kaleido.store.simulator.elite_surge_event_discounted":{"revenue":[104.77,233.33,117.85,117.57,173.04,0,93.08,62.96,38.78,27.73,5.86],"share":[0.365,0.813,0.395,0.429,0.675,0.0,0.31,0.213,0.148,0.098,0.019]},"com.vertex.kaleido.store.simulator.vipinsiderbundle":{"revenue":[277.77,29.35,0,0,0,0,17.82,0,0,0,0],"share":[0.967,0.102,0.0,0.0,0.0,0.0,0.059,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.frostfallpass25":{"revenue":[0,0,0,0,6.68,1233.73,621.12,1127.13,1290.82,1479.68,2531.34],"share":[0.0,0.0,0.0,0.0,0.026,3.925,2.066,3.807,4.928,5.232,8.388]}}},"weekends":{"labels":["May 2–3","May 9–10","May 16–17","May 23–24","May 30–31","Jun 6–7","Jun 13–14","Jun 20–21","Jun 27–28","Jul 4–5","Jul 11–12"],"totals":[13628.65,15846.65,14057.04,13312.63,16586.17,11234.17,11478.18,14362.17,13333.03,12153.69,13760.63],"products":["com.vertex.kaleido.store.simulator.coin_100","com.vertex.kaleido.store.simulator.coin_1100","com.vertex.kaleido.store.simulator.coin_20000","com.vertex.kaleido.store.simulator.coin_2750","com.vertex.kaleido.store.simulator.coin_500v2","com.vertex.kaleido.store.simulator.coin_8000","com.vertex.kaleido.store.simulator.discount30silenceads","com.vertex.kaleido.store.simulator.discount30rookiepack","com.vertex.kaleido.store.simulator.fuel_100","com.vertex.kaleido.store.simulator.fuel_10000","com.vertex.kaleido.store.simulator.fuel_1000v2","com.vertex.kaleido.store.simulator.fuel_2250","com.vertex.kaleido.store.simulator.fuel_500","com.vertex.kaleido.store.simulator.fuel_5000","com.vertex.kaleido.store.simulator.msb_id_can_founders_discounted","com.vertex.kaleido.store.simulator.msb_id_harvest_festival","com.vertex.kaleido.store.simulator.msb_id_harvest_festival_discounted","com.vertex.kaleido.store.simulator.msb_id_usa_founders","com.vertex.kaleido.store.simulator.direlite","com.vertex.kaleido.store.simulator.dirpro","com.vertex.kaleido.store.simulator.dirproelite","com.vertex.kaleido.store.simulator.deluxe_shelving_offer","com.vertex.kaleido.store.simulator.silenceads","com.vertex.kaleido.store.simulator.momentum_offer_step_10","com.vertex.kaleido.store.simulator.momentum_offer_step_14","com.vertex.kaleido.store.simulator.momentum_offer_step_18","com.vertex.kaleido.store.simulator.momentum_offer_step_2","com.vertex.kaleido.store.simulator.momentum_offer_step_22","com.vertex.kaleido.store.simulator.momentum_offer_step_26","com.vertex.kaleido.store.simulator.momentum_offer_step_6","com.vertex.kaleido.store.simulator.rookiepack","com.vertex.kaleido.store.simulator.solsticepass26","com.vertex.kaleido.store.simulator.elite_surge_event","com.vertex.kaleido.store.simulator.elite_surge_event_discounted","com.vertex.kaleido.store.simulator.vipinsiderbundle","com.vertex.kaleido.store.simulator.frostfallpass25"],"series":{"com.vertex.kaleido.store.simulator.coin_100":{"revenue":[113.36,79.06,85.93,105.76,98.86,98.86,119.87,144.08,121.58,144.07,211.16],"share":[0.832,0.499,0.611,0.794,0.596,0.88,1.044,1.003,0.912,1.185,1.535]},"com.vertex.kaleido.store.simulator.coin_1100":{"revenue":[203.32,253.67,277.86,366.06,243.42,364.16,480.86,355.54,375.37,464.95,454.63],"share":[1.492,1.601,1.977,2.75,1.468,3.242,4.189,2.476,2.815,3.826,3.304]},"com.vertex.kaleido.store.simulator.coin_20000":{"revenue":[367.58,286.64,474.1,395.74,273.45,554.83,233.8,342.44,1093.08,350.37,626.21],"share":[2.697,1.809,3.373,2.973,1.649,4.939,2.037,2.384,8.198,2.883,4.551]},"com.vertex.kaleido.store.simulator.coin_2750":{"revenue":[452.78,817.65,371.23,608.64,523.87,1092.6,907.23,806.6,1177.66,1125.01,725.91],"share":[3.322,5.16,2.641,4.572,3.158,9.726,7.904,5.616,8.833,9.257,5.275]},"com.vertex.kaleido.store.simulator.coin_500v2":{"revenue":[187.79,204.77,173.77,262.69,280.62,305.54,328.94,442.49,426.9,496.65,428.33],"share":[1.378,1.292,1.236,1.973,1.692,2.72,2.866,3.081,3.202,4.086,3.113]},"com.vertex.kaleido.store.simulator.coin_8000":{"revenue":[338.59,276.19,389.9,337.86,255.5,631.18,532.77,689.64,970.86,401.65,509.05],"share":[2.484,1.743,2.774,2.538,1.54,5.618,4.642,4.802,7.282,3.305,3.699]},"com.vertex.kaleido.store.simulator.discount30silenceads":{"revenue":[0,0,0,0,0,3.08,0,0,17.48,10.51,0],"share":[0.0,0.0,0.0,0.0,0.0,0.027,0.0,0.0,0.131,0.086,0.0]},"com.vertex.kaleido.store.simulator.discount30rookiepack":{"revenue":[0,0,0,0,0,0,162.97,201.78,55.04,44.31,0],"share":[0.0,0.0,0.0,0.0,0.0,0.0,1.42,1.405,0.413,0.365,0.0]},"com.vertex.kaleido.store.simulator.fuel_100":{"revenue":[856.58,819.78,640.29,774.32,574.04,602.78,642.53,683.63,819.8,848.47,652.99],"share":[6.285,5.173,4.555,5.816,3.461,5.366,5.598,4.76,6.149,6.981,4.745]},"com.vertex.kaleido.store.simulator.fuel_10000":{"revenue":[67.31,252.39,83.06,0,172.31,201.81,61.33,215.94,0,0,160.61],"share":[0.494,1.593,0.591,0.0,1.039,1.796,0.534,1.504,0.0,0.0,1.167]},"com.vertex.kaleido.store.simulator.fuel_1000v2":{"revenue":[713.25,817.62,588.5,667.5,688.21,844.68,842.02,698.44,968.23,880.21,752.76],"share":[5.233,5.16,4.187,5.014,4.149,7.519,7.336,4.863,7.262,7.242,5.47]},"com.vertex.kaleido.store.simulator.fuel_2250":{"revenue":[295.49,418.02,301.3,416.94,246.58,337.38,233.7,297.28,213.06,276.94,225.81],"share":[2.168,2.638,2.143,3.132,1.487,3.003,2.036,2.07,1.598,2.279,1.641]},"com.vertex.kaleido.store.simulator.fuel_500":{"revenue":[882.89,887.98,664.86,891.18,608.3,752.56,982.34,990.61,870.84,766.22,1042.93],"share":[6.478,5.604,4.73,6.694,3.668,6.699,8.558,6.897,6.531,6.304,7.579]},"com.vertex.kaleido.store.simulator.fuel_5000":{"revenue":[190.48,77.65,38.05,34.94,0,32.53,30.99,42.38,142.76,89.31,31.01],"share":[1.398,0.49,0.271,0.262,0.0,0.29,0.27,0.295,1.071,0.735,0.225]},"com.vertex.kaleido.store.simulator.msb_id_can_founders_discounted":{"revenue":[0,-4.49,0,0,0,0,0,0,0,0,0],"share":[0.0,-0.028,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.msb_id_harvest_festival":{"revenue":[0,0,0,0,0,0,-18.85,2386.64,0,0,0],"share":[0.0,0.0,0.0,0.0,0.0,0.0,-0.164,16.618,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.msb_id_harvest_festival_discounted":{"revenue":[0,0,0,0,0,0,667.47,0,0,0,0],"share":[0.0,0.0,0.0,0.0,0.0,0.0,5.815,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.msb_id_usa_founders":{"revenue":[0,275.39,357.18,0,0,0,0,0,0,0,0],"share":[0.0,1.738,2.541,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.direlite":{"revenue":[334.05,455.7,287.04,662.52,376.23,772.34,563.75,678.63,515.06,516.63,807.41],"share":[2.451,2.876,2.042,4.977,2.268,6.875,4.911,4.725,3.863,4.251,5.868]},"com.vertex.kaleido.store.simulator.dirpro":{"revenue":[561.8,538.94,554.19,704.47,694.57,642.52,735.52,681.39,691.67,830.04,1186.31],"share":[4.122,3.401,3.942,5.292,4.188,5.719,6.408,4.744,5.188,6.83,8.621]},"com.vertex.kaleido.store.simulator.dirproelite":{"revenue":[1052.38,1180.39,1248.16,1208.68,1485.86,1400.15,1766.01,1467.63,1787.37,2384.5,2001.5],"share":[7.722,7.449,8.879,9.079,8.958,12.463,15.386,10.219,13.406,19.62,14.545]},"com.vertex.kaleido.store.simulator.deluxe_shelving_offer":{"revenue":[791.48,1014.94,883.12,1534.99,1598.26,0,0,0,0,0,0],"share":[5.807,6.405,6.282,11.53,9.636,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.silenceads":{"revenue":[1345.66,1412.66,1462.09,1311.57,1463.51,1110.29,1188.71,1523.79,1485.28,1516.04,1599.88],"share":[9.874,8.915,10.401,9.852,8.824,9.883,10.356,10.61,11.14,12.474,11.627]},"com.vertex.kaleido.store.simulator.momentum_offer_step_10":{"revenue":[0,0,0,0,421.27,0,0,0,0,0,0],"share":[0.0,0.0,0.0,0.0,2.54,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.momentum_offer_step_14":{"revenue":[0,0,0,0,240.07,0,0,0,0,0,0],"share":[0.0,0.0,0.0,0.0,1.447,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.momentum_offer_step_18":{"revenue":[0,0,0,0,192.12,0,0,0,0,0,0],"share":[0.0,0.0,0.0,0.0,1.158,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.momentum_offer_step_2":{"revenue":[0,-0.06,1.16,-0.3,1146.59,-9.52,0,0,0,0,0],"share":[0.0,-0.0,0.008,-0.002,6.913,-0.085,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.momentum_offer_step_22":{"revenue":[0,0,0,0,129.26,0,0,0,0,0,0],"share":[0.0,0.0,0.0,0.0,0.779,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.momentum_offer_step_26":{"revenue":[0,0,0,0,102.14,0,0,0,0,0,0],"share":[0.0,0.0,0.0,0.0,0.616,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.momentum_offer_step_6":{"revenue":[0,0,0,3.09,731.47,-9.48,0,0,0,0,0],"share":[0.0,0.0,0.0,0.023,4.41,-0.084,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.rookiepack":{"revenue":[721.03,768.68,699.81,939.0,676.28,612.39,843.18,928.34,933.45,973.95,1395.25],"share":[5.291,4.851,4.978,7.053,4.077,5.451,7.346,6.464,7.001,8.014,10.139]},"com.vertex.kaleido.store.simulator.solsticepass26":{"revenue":[1969.83,2590.66,2303.35,0,0,0,0,0,0,0,0],"share":[14.454,16.348,16.386,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.elite_surge_event":{"revenue":[1810.26,1966.21,1756.01,1695.34,2597.45,157.66,99.43,140.28,50.41,27.88,0],"share":[13.283,12.408,12.492,12.735,15.66,1.403,0.866,0.977,0.378,0.229,0.0]},"com.vertex.kaleido.store.simulator.elite_surge_event_discounted":{"revenue":[341.2,451.66,416.08,391.34,465.62,0,34.5,33.97,0,5.98,0],"share":[2.504,2.85,2.96,2.94,2.807,0.0,0.301,0.237,0.0,0.049,0.0]},"com.vertex.kaleido.store.simulator.vipinsiderbundle":{"revenue":[31.54,0,0,0,0,0,0,0,0,0,0],"share":[0.231,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"com.vertex.kaleido.store.simulator.frostfallpass25":{"revenue":[-6.73,0,0,0,300.31,716.83,20.26,610.65,617.13,0,948.88],"share":[-0.049,0.0,0.0,0.0,1.811,6.381,0.177,4.252,4.629,0.0,6.896]}}}},"ios":{"weekdays":{"labels":["May 4–8","May 11–15","May 18–22","May 25–29","Jun 1–5","Jun 8–12","Jun 15–19","Jun 22–26","Jun 29–Jul 3","Jul 6–10","Jul 13–17"],"totals":[74847,83191,94132,79485,87141,97066,102840,93860,96211,111507,103314],"products":["$100 Coin Bundle","$1100 Coin Bundle","$20000 Coin Bundle","$2750 Coin Bundle","$500 Coin Bundle","$8000 Coin Bundle","100 Fuel Bundle","1000 Fuel Bundle","10000 Fuel Bundle","2250 Fuel Bundle","500 Fuel Bundle","5000 Fuel Bundle","Harvest Festival","Harvest Festival Discounted","Founders Day Canada","Founders Day Canada Discounted","Founders Day USA","Founders Day USA Discounted","Director Pass Elite","Director Pass Pro","Director Pass Pro + Elite","Deluxe Shelving","Silence Ads 30% Off","Silence Ads All","Silence ads on 30% discount","Silence ads on 50%","Momentum Offers 10","Momentum Offers 14","Momentum Offers 18","Momentum Offers 2","Momentum Offers 22","Momentum Offers 26","Momentum Offers 6","Rookie Pack","Rookie pack at 30% discount","Solstice Pass 2026","VIP Insider Bundle","Elite Surge Event","Elite Surge Event Discounted","Frostfall Pass 2025"],"series":{"Director Pass Pro":{"revenue":[3218,3155,4041,5379,5751,4921,4932,4655,6253,5482,4593],"share":[4.299,3.792,4.293,6.767,6.6,5.07,4.796,4.96,6.499,4.916,4.446]},"$100 Coin Bundle":{"revenue":[593,426,482,653,517,644,747,718,688,1052,811],"share":[0.792,0.512,0.512,0.822,0.593,0.663,0.726,0.765,0.715,0.943,0.785]},"$500 Coin Bundle":{"revenue":[1947,2239,2027,2576,3572,2730,2594,3172,3957,4231,3273],"share":[2.601,2.691,2.153,3.241,4.099,2.813,2.522,3.38,4.113,3.794,3.168]},"$1100 Coin Bundle":{"revenue":[2406,2855,2596,3320,3501,3057,3899,3857,4279,4661,4686],"share":[3.215,3.432,2.758,4.177,4.018,3.149,3.791,4.109,4.448,4.18,4.536]},"$2750 Coin Bundle":{"revenue":[4140,4840,5826,6246,5985,4430,5163,5789,7105,10859,10217],"share":[5.531,5.818,6.189,7.858,6.868,4.564,5.02,6.168,7.385,9.738,9.889]},"$8000 Coin Bundle":{"revenue":[3095,1872,3678,3540,4521,4151,3418,5948,4884,6453,5039],"share":[4.135,2.25,3.907,4.454,5.188,4.276,3.324,6.337,5.076,5.787,4.877]},"$20000 Coin Bundle":{"revenue":[2905,3079,4194,4127,5319,5578,3970,4304,5315,4769,7464],"share":[3.881,3.701,4.455,5.192,6.104,5.747,3.86,4.586,5.524,4.277,7.225]},"100 Fuel Bundle":{"revenue":[2817,3249,3211,3545,3835,2576,3411,3950,3536,4788,3868],"share":[3.764,3.905,3.411,4.46,4.401,2.654,3.317,4.208,3.675,4.294,3.744]},"500 Fuel Bundle":{"revenue":[5832,7182,6749,6004,5544,4860,5033,6802,9560,9759,9220],"share":[7.792,8.633,7.17,7.554,6.362,5.007,4.894,7.247,9.936,8.752,8.924]},"1000 Fuel Bundle":{"revenue":[4844,6294,4880,6558,4526,4022,5315,6451,6429,5834,8266],"share":[6.472,7.566,5.184,8.251,5.194,4.144,5.168,6.873,6.682,5.232,8.001]},"2250 Fuel Bundle":{"revenue":[1982,1289,1864,1423,1439,1261,1626,2143,1895,1865,2240],"share":[2.648,1.549,1.98,1.79,1.651,1.299,1.581,2.283,1.97,1.673,2.168]},"5000 Fuel Bundle":{"revenue":[947,541,927,1374,813,520,639,1105,834,1468,962],"share":[1.265,0.65,0.985,1.729,0.933,0.536,0.621,1.177,0.867,1.317,0.931]},"10000 Fuel Bundle":{"revenue":[72,277,560,740,529,527,520,437,756,431,810],"share":[0.096,0.333,0.595,0.931,0.607,0.543,0.506,0.466,0.786,0.387,0.784]},"Harvest Festival":{"revenue":[0,0,-5,0,0,-5,-11,4581,0,0,0],"share":[0.0,0.0,-0.005,0.0,0.0,-0.005,-0.011,4.881,0.0,0.0,0.0]},"Harvest Festival Discounted":{"revenue":[-6,-5,0,0,0,-16,-4,2309,0,0,0],"share":[-0.008,-0.006,0.0,0.0,0.0,-0.016,-0.004,2.46,0.0,0.0,0.0]},"Founders Day Canada":{"revenue":[0,0,384,196,0,0,0,0,0,0,0],"share":[0.0,0.0,0.408,0.247,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"Founders Day Canada Discounted":{"revenue":[0,0,968,0,0,0,0,0,0,0,0],"share":[0.0,0.0,1.028,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"Founders Day USA":{"revenue":[-5,350,1033,0,0,0,0,0,0,0,0],"share":[-0.007,0.421,1.097,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"Founders Day USA Discounted":{"revenue":[0,935,0,0,0,0,0,0,0,0,0],"share":[0.0,1.124,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"Director Pass Elite":{"revenue":[3222,3551,3146,3391,3623,3823,3355,3645,4721,4825,5164],"share":[4.305,4.268,3.342,4.266,4.158,3.939,3.262,3.883,4.907,4.327,4.998]},"Director Pass Pro + Elite":{"revenue":[8937,8444,8687,9042,8126,10505,10154,9747,11015,12835,11112],"share":[11.94,10.15,9.229,11.376,9.325,10.823,9.874,10.385,11.449,11.51,10.756]},"Deluxe Shelving":{"revenue":[4093,4285,3663,3572,5138,7755,9203,386,1279,65,0],"share":[5.468,5.151,3.891,4.494,5.896,7.989,8.949,0.411,1.329,0.058,0.0]},"Silence Ads 30% Off":{"revenue":[14,0,0,12,15,0,0,0,0,0,0],"share":[0.019,0.0,0.0,0.015,0.017,0.0,0.0,0.0,0.0,0.0,0.0]},"Silence Ads All":{"revenue":[8034,9711,12626,10053,9285,9910,11606,12830,12708,15431,10462],"share":[10.734,11.673,13.413,12.648,10.655,10.21,11.285,13.669,13.208,13.839,10.126]},"Silence ads on 30% discount":{"revenue":[0,0,0,0,0,0,5,0,73,142,165],"share":[0.0,0.0,0.0,0.0,0.0,0.0,0.005,0.0,0.076,0.127,0.16]},"Silence ads on 50%":{"revenue":[0,0,0,0,0,0,0,0,28,36,26],"share":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.029,0.032,0.025]},"Momentum Offers 2":{"revenue":[-3,-6,0,-2,2269,5305,5782,-5,1,0,1],"share":[-0.004,-0.007,0.0,-0.003,2.604,5.465,5.622,-0.005,0.001,0.0,0.001]},"Momentum Offers 6":{"revenue":[-8,-15,-9,-2,1931,5542,4548,-11,0,0,5],"share":[-0.011,-0.018,-0.01,-0.003,2.216,5.71,4.422,-0.012,0.0,0.0,0.005]},"Momentum Offers 10":{"revenue":[-5,-7,-11,0,1451,3682,3748,-12,0,0,0],"share":[-0.007,-0.008,-0.012,0.0,1.665,3.793,3.644,-0.013,0.0,0.0,0.0]},"Momentum Offers 14":{"revenue":[0,-10,-11,0,843,2035,2787,-11,0,0,8],"share":[0.0,-0.012,-0.012,0.0,0.967,2.097,2.71,-0.012,0.0,0.0,0.008]},"Momentum Offers 18":{"revenue":[0,0,0,0,818,1570,2049,0,0,0,0],"share":[0.0,0.0,0.0,0.0,0.939,1.617,1.992,0.0,0.0,0.0,0.0]},"Momentum Offers 22":{"revenue":[0,0,0,0,449,987,1136,0,0,0,0],"share":[0.0,0.0,0.0,0.0,0.515,1.017,1.105,0.0,0.0,0.0,0.0]},"Momentum Offers 26":{"revenue":[0,0,0,0,286,479,479,0,0,0,0],"share":[0.0,0.0,0.0,0.0,0.328,0.493,0.466,0.0,0.0,0.0,0.0]},"Rookie Pack":{"revenue":[4519,5556,6556,5107,6042,5235,5334,6785,6829,8197,8529],"share":[6.038,6.679,6.965,6.425,6.934,5.393,5.187,7.229,7.098,7.351,8.255]},"Rookie pack at 30% discount":{"revenue":[0,0,5,0,-4,0,0,0,164,298,301],"share":[0.0,0.0,0.005,0.0,-0.005,0.0,0.0,0.0,0.17,0.267,0.291]},"Solstice Pass 2026":{"revenue":[10207,12433,15504,2086,0,0,0,0,0,0,0],"share":[13.637,14.945,16.47,2.624,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"VIP Insider Bundle":{"revenue":[333,79,0,0,0,0,0,0,22,0,0],"share":[0.445,0.095,0.0,0.0,0.0,0.0,0.0,0.0,0.023,0.0,0.0]},"Elite Surge Event":{"revenue":[321,211,291,247,250,327,952,796,583,280,76],"share":[0.429,0.254,0.309,0.311,0.287,0.337,0.926,0.848,0.606,0.251,0.074]},"Elite Surge Event Discounted":{"revenue":[362,333,234,294,356,467,171,190,178,100,37],"share":[0.484,0.4,0.249,0.37,0.409,0.481,0.166,0.202,0.185,0.09,0.036]},"Frostfall Pass 2025":{"revenue":[7,5,-10,-14,407,167,264,3260,3119,7646,5979],"share":[0.009,0.006,-0.011,-0.018,0.467,0.172,0.257,3.473,3.242,6.857,5.787]}}},"weekends":{"labels":["May 2–3","May 9–10","May 16–17","May 23–24","May 30–31","Jun 6–7","Jun 13–14","Jun 20–21","Jun 27–28","Jul 4–5","Jul 11–12"],"totals":[38455,42289,49162,37607,49521,50986,39268,46021,51263,49070,50224],"products":["$100 Coin Bundle","$1100 Coin Bundle","$20000 Coin Bundle","$2750 Coin Bundle","$500 Coin Bundle","$8000 Coin Bundle","100 Fuel Bundle","1000 Fuel Bundle","10000 Fuel Bundle","2250 Fuel Bundle","500 Fuel Bundle","5000 Fuel Bundle","Harvest Festival","Harvest Festival Discounted","Founders Day Canada","Founders Day USA","Director Pass Elite","Director Pass Pro","Director Pass Pro + Elite","Deluxe Shelving","Silence Ads All","Silence ads on 30% discount","Silence ads on 50%","Momentum Offers 10","Momentum Offers 14","Momentum Offers 18","Momentum Offers 2","Momentum Offers 22","Momentum Offers 26","Momentum Offers 6","Rookie Pack","Rookie pack at 30% discount","Solstice Pass 2026","VIP Insider Bundle","Elite Surge Event","Elite Surge Event Discounted","Frostfall Pass 2025"],"series":{"Director Pass Pro":{"revenue":[1076,1222,1568,1633,1832,1587,2147,2143,2446,2895,2730],"share":[2.798,2.89,3.189,4.342,3.699,3.113,5.468,4.657,4.771,5.9,5.436]},"$100 Coin Bundle":{"revenue":[198,141,219,300,320,184,308,271,288,335,444],"share":[0.515,0.333,0.445,0.798,0.646,0.361,0.784,0.589,0.562,0.683,0.884]},"$500 Coin Bundle":{"revenue":[681,888,1031,1062,1160,941,1218,1395,1514,2028,1498],"share":[1.771,2.1,2.097,2.824,2.342,1.846,3.102,3.031,2.953,4.133,2.983]},"$1100 Coin Bundle":{"revenue":[784,1296,842,1151,1051,893,1487,1902,1475,2361,2046],"share":[2.039,3.065,1.713,3.061,2.122,1.751,3.787,4.133,2.877,4.811,4.074]},"$2750 Coin Bundle":{"revenue":[1504,1835,1918,2221,1827,2504,3125,2948,3079,4321,4263],"share":[3.911,4.339,3.901,5.906,3.689,4.911,7.958,6.406,6.006,8.806,8.488]},"$8000 Coin Bundle":{"revenue":[1015,911,1469,1117,1498,1173,1979,2533,2202,1871,2673],"share":[2.639,2.154,2.988,2.97,3.025,2.301,5.04,5.504,4.295,3.813,5.322]},"$20000 Coin Bundle":{"revenue":[1515,1407,1344,1742,1665,1665,2141,4002,2890,1894,4529],"share":[3.94,3.327,2.734,4.632,3.362,3.266,5.452,8.696,5.638,3.86,9.018]},"100 Fuel Bundle":{"revenue":[1615,1330,1558,1754,1686,1823,2108,1747,1848,2212,1922],"share":[4.2,3.145,3.169,4.664,3.405,3.575,5.368,3.796,3.605,4.508,3.827]},"500 Fuel Bundle":{"revenue":[3551,3122,2999,3520,3380,2788,2981,3101,3548,3599,4363],"share":[9.234,7.383,6.1,9.36,6.825,5.468,7.591,6.738,6.921,7.334,8.687]},"1000 Fuel Bundle":{"revenue":[2140,3374,2590,3076,3009,3399,3289,3300,3267,3664,2698],"share":[5.565,7.978,5.268,8.179,6.076,6.667,8.376,7.171,6.373,7.467,5.372]},"2250 Fuel Bundle":{"revenue":[1126,739,1038,800,775,876,1125,1089,913,1206,883],"share":[2.928,1.747,2.111,2.127,1.565,1.718,2.865,2.366,1.781,2.458,1.758]},"5000 Fuel Bundle":{"revenue":[487,455,503,485,457,224,310,591,885,339,377],"share":[1.266,1.076,1.023,1.29,0.923,0.439,0.789,1.284,1.726,0.691,0.751]},"10000 Fuel Bundle":{"revenue":[195,121,188,209,159,307,222,392,316,200,496],"share":[0.507,0.286,0.382,0.556,0.321,0.602,0.565,0.852,0.616,0.408,0.988]},"Harvest Festival":{"revenue":[0,0,0,-12,0,0,0,4885,0,0,0],"share":[0.0,0.0,0.0,-0.032,0.0,0.0,0.0,10.615,0.0,0.0,0.0]},"Harvest Festival Discounted":{"revenue":[0,0,0,0,0,-4,1419,5,0,0,0],"share":[0.0,0.0,0.0,0.0,0.0,-0.008,3.614,0.011,0.0,0.0,0.0]},"Founders Day Canada":{"revenue":[0,0,1061,0,0,0,0,0,0,0,0],"share":[0.0,0.0,2.158,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"Founders Day USA":{"revenue":[0,645,0,0,0,0,0,0,0,0,0],"share":[0.0,1.525,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"Director Pass Elite":{"revenue":[1269,1217,1044,1440,1339,1621,2050,2239,1819,2845,2763],"share":[3.3,2.878,2.124,3.829,2.704,3.179,5.221,4.865,3.548,5.798,5.501]},"Director Pass Pro + Elite":{"revenue":[3757,3469,3286,2866,4625,4456,5409,3668,5982,5831,6836],"share":[9.77,8.203,6.684,7.621,9.339,8.74,13.775,7.97,11.669,11.883,13.611]},"Deluxe Shelving":{"revenue":[1527,1851,2581,2142,3444,4339,218,89,6107,0,0],"share":[3.971,4.377,5.25,5.696,6.955,8.51,0.555,0.193,11.913,0.0,0.0]},"Silence Ads All":{"revenue":[3992,5468,4075,5061,5511,4820,4671,5380,6118,6207,4899],"share":[10.381,12.93,8.289,13.458,11.129,9.454,11.895,11.69,11.935,12.649,9.754]},"Silence ads on 30% discount":{"revenue":[0,0,0,0,0,0,0,0,72,49,61],"share":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.14,0.1,0.121]},"Silence ads on 50%":{"revenue":[0,0,0,0,0,0,0,0,8,7,0],"share":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.016,0.014,0.0]},"Momentum Offers 2":{"revenue":[-1,-5,0,5,1803,2853,0,-1,-1,0,8],"share":[-0.003,-0.012,0.0,0.013,3.641,5.596,0.0,-0.002,-0.002,0.0,0.016]},"Momentum Offers 6":{"revenue":[0,-3,0,-3,1615,2475,0,0,0,0,8],"share":[0.0,-0.007,0.0,-0.008,3.261,4.854,0.0,0.0,0.0,0.0,0.016]},"Momentum Offers 10":{"revenue":[0,0,0,0,946,1810,0,0,0,0,7],"share":[0.0,0.0,0.0,0.0,1.91,3.55,0.0,0.0,0.0,0.0,0.014]},"Momentum Offers 14":{"revenue":[0,0,0,0,778,814,0,0,0,0,0],"share":[0.0,0.0,0.0,0.0,1.571,1.597,0.0,0.0,0.0,0.0,0.0]},"Momentum Offers 18":{"revenue":[0,0,0,0,457,648,0,0,0,0,0],"share":[0.0,0.0,0.0,0.0,0.923,1.271,0.0,0.0,0.0,0.0,0.0]},"Momentum Offers 22":{"revenue":[0,0,0,0,335,222,0,0,0,0,0],"share":[0.0,0.0,0.0,0.0,0.676,0.435,0.0,0.0,0.0,0.0,0.0]},"Momentum Offers 26":{"revenue":[0,0,0,0,150,152,0,0,0,0,0],"share":[0.0,0.0,0.0,0.0,0.303,0.298,0.0,0.0,0.0,0.0,0.0]},"Rookie Pack":{"revenue":[2100,2721,2178,2301,3465,2997,2469,2349,3759,3556,4351],"share":[5.461,6.434,4.43,6.119,6.997,5.878,6.288,5.104,7.333,7.247,8.663]},"Rookie pack at 30% discount":{"revenue":[0,0,0,0,0,0,0,0,117,144,214],"share":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.228,0.293,0.426]},"Solstice Pass 2026":{"revenue":[4704,5627,12769,0,0,0,0,0,0,0,0],"share":[12.232,13.306,25.973,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},"VIP Insider Bundle":{"revenue":[232,0,0,0,0,0,13,0,0,0,0],"share":[0.603,0.0,0.0,0.0,0.0,0.0,0.033,0.0,0.0,0.0,0.0]},"Elite Surge Event":{"revenue":[4291,3555,4156,3798,5300,4153,412,494,117,59,0],"share":[11.158,8.406,8.454,10.099,10.703,8.145,1.049,1.073,0.228,0.12,0.0]},"Elite Surge Event Discounted":{"revenue":[696,895,745,924,904,1207,113,80,50,16,0],"share":[1.81,2.116,1.515,2.457,1.825,2.367,0.288,0.174,0.098,0.033,0.0]},"Frostfall Pass 2025":{"revenue":[0,-5,0,0,30,55,54,1418,2443,3431,2155],"share":[0.0,-0.012,0.0,0.0,0.061,0.108,0.138,3.081,4.766,6.992,4.291]}}}}};
+let currentPlatform = 'android';
+let currentPeriod = 'weekdays';
+let currentProduct = null;
+let currentProductList = [];
+
+const productSearch = document.getElementById('productSearch');
+const productList = document.getElementById('productList');
+const metricSelect = document.getElementById('metricSelect');
+const chartTitle = document.getElementById('chartTitle');
+const weekSelect = document.getElementById('weekSelect');
+const pieTitle = document.getElementById('pieTitle');
+const pieLegend = document.getElementById('pieLegend');
+const pieTooltip = document.getElementById('pieTooltip');
+
+function shortName(p){
+  // trim common package prefix for readability
+  return p.replace(/^com\.[a-z0-9]+\./i,'').replace(/^kaleido\.store\.simulator\./i,'').replace(/_/g,' ');
+}
+
+function populateProducts(){
+  const platformData = DATA[currentPlatform];
+  let products;
+  if(currentPeriod === 'combined'){
+    const set = new Set([...platformData.weekdays.products, ...platformData.weekends.products]);
+    products = [...set].sort();
+  } else {
+    products = platformData[currentPeriod].products;
+  }
+  currentProductList = products;
+  if(!currentProduct || !products.includes(currentProduct)){
+    currentProduct = products[0];
+  }
+  productSearch.value = shortName(currentProduct);
+  renderProductList(products);
+}
+
+function renderProductList(products, filter){
+  const items = filter
+    ? products.filter(p => shortName(p).toLowerCase().includes(filter.toLowerCase()))
+    : products;
+  productList.innerHTML = items.length
+    ? items.map(p => `<div class="combo-item${p===currentProduct?' hl':''}" data-p="${p.replace(/"/g,'&quot;')}">${shortName(p)}</div>`).join('')
+    : `<div class="combo-empty">No matches</div>`;
+  productList.querySelectorAll('.combo-item').forEach(el => {
+    el.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      currentProduct = el.getAttribute('data-p');
+      productSearch.value = shortName(currentProduct);
+      closeProductList();
+      render();
+    });
+  });
+}
+
+function openProductList(){
+  renderProductList(currentProductList, '');
+  productList.classList.add('open');
+}
+function closeProductList(){
+  productList.classList.remove('open');
+}
+
+productSearch.addEventListener('focus', () => {
+  productSearch.select();
+  openProductList();
+});
+productSearch.addEventListener('input', () => {
+  renderProductList(currentProductList, productSearch.value);
+  productList.classList.add('open');
+});
+productSearch.addEventListener('blur', () => {
+  setTimeout(() => {
+    closeProductList();
+    productSearch.value = shortName(currentProduct);
+  }, 120);
+});
+productSearch.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape'){ productSearch.blur(); }
+  if(e.key === 'Enter'){
+    const first = productList.querySelector('.combo-item');
+    if(first){ first.dispatchEvent(new Event('mousedown')); }
+  }
+});
+
+function populateWeeks(){
+  const platformData = DATA[currentPlatform];
+  let labels;
+  if(currentPeriod === 'combined'){
+    const wd = platformData.weekdays.labels, we = platformData.weekends.labels;
+    const n = Math.min(wd.length, we.length);
+    labels = [];
+    for(let i=0;i<n;i++) labels.push(`Week ${i+1}: ${wd[i]} / ${we[i]}`);
+  } else {
+    labels = platformData[currentPeriod].labels;
+  }
+  weekSelect.innerHTML = labels.map((l, i) => `<option value="${i}">${l}</option>`).join('');
+  weekSelect.value = labels.length - 1; // default to most recent week
+}
+
+const chartLegend = document.getElementById('chartLegend');
+
+function render(){
+  const platformData = DATA[currentPlatform];
+  const metric = metricSelect.value;
+  const yLabel = metric === 'share' ? 'Revenue Share (%)' : 'Revenue (USD)';
+
+  if(currentPeriod === 'combined'){
+    const wdPeriod = platformData.weekdays, wePeriod = platformData.weekends;
+    const products = [...new Set([...wdPeriod.products, ...wePeriod.products])].sort();
+    const product = products.includes(currentProduct) ? currentProduct : products[0];
+    const n = Math.min(wdPeriod.labels.length, wePeriod.labels.length);
+    const wdSeries = (wdPeriod.series[product] ? wdPeriod.series[product][metric] : new Array(wdPeriod.labels.length).fill(0)).slice(0, n);
+    const weSeries = (wePeriod.series[product] ? wePeriod.series[product][metric] : new Array(wePeriod.labels.length).fill(0)).slice(0, n);
+    const genericLabels = Array.from({length: n}, (_, i) => 'Wk ' + (i+1));
+
+    chartTitle.textContent = (metric === 'share' ? 'Revenue share by week — ' : 'Revenue by week — ') + shortName(product);
+    chartLegend.style.display = 'flex';
+    chartLegend.innerHTML = `
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:2px;background:#00e5c3;display:inline-block;"></span>Weekday</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:2px;background:#ff4d6d;display:inline-block;"></span>Weekend</span>
+    `;
+
+    drawChart(genericLabels, [
+      {data: wdSeries, color: '#00e5c3', name: 'Weekday'},
+      {data: weSeries, color: '#ff4d6d', name: 'Weekend'}
+    ], metric, yLabel);
+
+    drawPieCombined(wdPeriod, wePeriod);
+    return;
+  }
+
+  chartLegend.style.display = 'none';
+  const period = platformData[currentPeriod];
+  const product = currentProduct || period.products[0];
+  const series = period.series[product][metric];
+  const labels = period.labels;
+
+  chartTitle.textContent = (metric === 'share' ? 'Revenue share by week — ' : 'Revenue by week — ') + shortName(product);
+  drawChart(labels, [{data: series, color: '#4d9fff', name: shortName(product)}], metric, yLabel);
+  drawPie(period);
+}
+
+function fmtVal(v, metric){
+  return metric === 'share'
+    ? v.toFixed(2) + '%'
+    : '$' + v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function drawChart(labels, seriesList, metric, yLabel){
+  const svg = document.getElementById('mainChart');
+  const wrap = document.getElementById('chartWrap');
+  const tooltip = document.getElementById('tooltip');
+  const W = wrap.clientWidth || 900;
+  const H = wrap.clientHeight || 420;
+  const padL = 56, padR = 20, padT = 20, padB = 50;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const allVals = seriesList.flatMap(s => s.data);
+  const maxVal = Math.max(...allVals, 0);
+  const niceMax = maxVal <= 0 ? 1 : maxVal * 1.15;
+  const n = labels.length;
+  const xStep = n > 1 ? plotW / (n - 1) : 0;
+
+  const xFor = i => padL + (n > 1 ? i * xStep : plotW / 2);
+  const yFor = v => padT + plotH - (v / niceMax) * plotH;
+
+  const gridCount = 5;
+  let gridLines = '';
+  let yLabelsSvg = '';
+  for(let g = 0; g <= gridCount; g++){
+    const val = (niceMax / gridCount) * g;
+    const y = yFor(val);
+    gridLines += `<line class="grid-line" x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}"></line>`;
+    const txt = metric === 'share' ? val.toFixed(1) + '%' : '$' + Math.round(val).toLocaleString();
+    yLabelsSvg += `<text class="axis-label" x="${padL - 8}" y="${y + 4}" text-anchor="end">${txt}</text>`;
+  }
+
+  let xLabelsSvg = '';
+  labels.forEach((l, i) => {
+    const x = xFor(i);
+    xLabelsSvg += `<text class="axis-label" x="${x}" y="${H - padB + 20}" text-anchor="middle" transform="rotate(${n > 6 ? -30 : 0} ${x} ${H - padB + 20})">${l}</text>`;
+  });
+
+  let seriesSvg = '';
+  let allPoints = [];
+  seriesList.forEach((s, si) => {
+    let pathD = '';
+    let points = '';
+    s.data.forEach((v, i) => {
+      const x = xFor(i), y = yFor(v);
+      pathD += (i === 0 ? 'M' : 'L') + x + ',' + y + ' ';
+      points += `<circle class="data-point" cx="${x}" cy="${y}" r="4" data-i="${i}" data-v="${v}" data-s="${si}" style="fill:${s.color};stroke:var(--bg);"></circle>`;
+      allPoints.push({x, y, i, v, si});
+    });
+    const areaD = seriesList.length === 1
+      ? pathD + `L${xFor(n-1)},${padT+plotH} L${xFor(0)},${padT+plotH} Z`
+      : '';
+    seriesSvg += `<path d="${areaD}" fill="url(#areaGrad)" opacity="0.5"></path>`;
+    seriesSvg += `<path d="${pathD}" fill="none" stroke="${s.color}" stroke-width="2.5"></path>`;
+    seriesSvg += points;
+  });
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#4d9fff" stop-opacity="0.35"></stop>
+        <stop offset="100%" stop-color="#4d9fff" stop-opacity="0"></stop>
+      </linearGradient>
+    </defs>
+    ${gridLines}
+    ${seriesSvg}
+    ${yLabelsSvg}
+    ${xLabelsSvg}
+    <text class="axis-title" x="${padL + plotW/2}" y="${H - 4}" text-anchor="middle">Week</text>
+    <text class="axis-title" transform="rotate(-90)" x="${-(padT + plotH/2)}" y="14" text-anchor="middle">${yLabel}</text>
+  `;
+
+  svg.querySelectorAll('.data-point').forEach(pt => {
+    pt.addEventListener('mouseenter', () => {
+      const i = +pt.getAttribute('data-i');
+      const v = +pt.getAttribute('data-v');
+      const si = +pt.getAttribute('data-s');
+      const name = seriesList[si].name;
+      const cx = parseFloat(pt.getAttribute('cx'));
+      const cy = parseFloat(pt.getAttribute('cy'));
+      tooltip.innerHTML = `<div class="t-label">${labels[i]}${seriesList.length>1 ? ' · '+name : ''}</div><div>${fmtVal(v, metric)}</div>`;
+      tooltip.style.left = cx + 'px';
+      tooltip.style.top = cy + 'px';
+      tooltip.classList.add('show');
+    });
+    pt.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+  });
+}
+
+window.addEventListener('resize', () => { if(currentProduct) render(); });
+
+const PIE_COLORS = [
+  '#00e5c3','#4d9fff','#ffb800','#ff4d6d','#00c47a',
+  '#7a5cff','#ff8a3d','#3ddc97','#5cc9ff','#e05be0',
+  '#c9e05b','#5b73e0','#e0785b','#5be0a5','#e0b95b',
+  '#5be0d1','#e05b8f','#7bc46e','#9b5be0','#d1e05b',
+  '#68a7e0','#c4735b','#8e97e0','#f29c6b'
+];
+
+function drawPie(period){
+  const weekIdx = weekSelect.value !== '' ? +weekSelect.value : period.labels.length - 1;
+  const weekLabel = period.labels[weekIdx];
+  const entries = period.products
+    .map(p => ({ name: p, revenue: period.series[p].revenue[weekIdx], share: period.series[p].share[weekIdx] }))
+    .filter(e => e.revenue > 0)
+    .sort((a, b) => b.revenue - a.revenue);
+
+  renderPie(entries, 'Revenue share by IAP — ' + weekLabel);
+}
+
+function drawPieCombined(wdPeriod, wePeriod){
+  const weekIdx = weekSelect.value !== '' ? +weekSelect.value : Math.min(wdPeriod.labels.length, wePeriod.labels.length) - 1;
+  const products = [...new Set([...wdPeriod.products, ...wePeriod.products])];
+  const raw = products.map(p => {
+    const wdRev = (wdPeriod.series[p] ? wdPeriod.series[p].revenue[weekIdx] : 0) || 0;
+    const weRev = (wePeriod.series[p] ? wePeriod.series[p].revenue[weekIdx] : 0) || 0;
+    return { name: p, revenue: wdRev + weRev };
+  }).filter(e => e.revenue > 0).sort((a,b) => b.revenue - a.revenue);
+
+  const total = raw.reduce((s,e) => s + e.revenue, 0);
+  const entries = raw.map(e => ({ ...e, share: total > 0 ? (e.revenue/total*100) : 0 }));
+
+  const weekLabel = `Week ${weekIdx+1}: ${wdPeriod.labels[weekIdx]} / ${wePeriod.labels[weekIdx]}`;
+  renderPie(entries, 'Revenue share by IAP — ' + weekLabel);
+}
+
+function renderPie(entries, title){
+  pieTitle.textContent = title;
+
+  const svg = document.getElementById('pieChart');
+  const wrap = document.getElementById('pieWrap');
+  const size = Math.min(wrap.clientWidth || 340, wrap.clientHeight || 340);
+  const cx = size / 2, cy = size / 2;
+  const rOuter = size / 2 - 10;
+  const rInner = rOuter * 0.6;
+  const total = entries.reduce((s, e) => s + e.revenue, 0);
+  const gap = 0.018; // radians of empty space between slices
+
+  const polar = (r, a) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+
+  let angle = -Math.PI / 2;
+  let slices = '';
+  entries.forEach((e, i) => {
+    const frac = total > 0 ? e.revenue / total : 0;
+    let sweep = frac * Math.PI * 2;
+    const startA = angle + gap / 2;
+    let endA = angle + sweep - gap / 2;
+    if(endA < startA) endA = startA; // guard tiny slices
+    const largeArc = (endA - startA) > Math.PI ? 1 : 0;
+    const [ox1, oy1] = polar(rOuter, startA);
+    const [ox2, oy2] = polar(rOuter, endA);
+    const [ix2, iy2] = polar(rInner, endA);
+    const [ix1, iy1] = polar(rInner, startA);
+    const color = PIE_COLORS[i % PIE_COLORS.length];
+    const d = `M${ox1},${oy1} A${rOuter},${rOuter} 0 ${largeArc} 1 ${ox2},${oy2} L${ix2},${iy2} A${rInner},${rInner} 0 ${largeArc} 0 ${ix1},${iy1} Z`;
+    slices += `<path class="pie-slice" d="${d}" fill="${color}" data-i="${i}"></path>`;
+    angle += sweep;
+  });
+
+  const centerLabel = `
+    <text class="pie-center-label pie-center-total" x="${cx}" y="${cy - 2}" text-anchor="middle">$${Math.round(total).toLocaleString()}</text>
+    <text class="pie-center-label pie-center-caption" x="${cx}" y="${cy + 16}" text-anchor="middle">${entries.length} IAPs</text>
+  `;
+
+  svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+  svg.innerHTML = slices + centerLabel;
+
+  svg.querySelectorAll('.pie-slice').forEach(sl => {
+    sl.addEventListener('mousemove', (e) => {
+      const i = +sl.getAttribute('data-i');
+      const en = entries[i];
+      const rect = wrap.getBoundingClientRect();
+      pieTooltip.innerHTML = `<div class="t-label">${shortName(en.name)}</div><div>${en.share.toFixed(2)}% · $${en.revenue.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>`;
+      pieTooltip.style.left = (e.clientX - rect.left) + 'px';
+      pieTooltip.style.top = (e.clientY - rect.top) + 'px';
+      pieTooltip.classList.add('show');
+    });
+    sl.addEventListener('mouseleave', () => pieTooltip.classList.remove('show'));
+  });
+
+  pieLegend.innerHTML = entries.map((e, i) => `
+    <div class="legend-row">
+      <span class="swatch" style="background:${PIE_COLORS[i % PIE_COLORS.length]}"></span>
+      <span class="lname">${shortName(e.name)}</span>
+      <span class="lval">${e.share.toFixed(2)}%</span>
+    </div>
+  `).join('');
+}
+
+window.addEventListener('resize', () => { if(weekSelect.value !== '') render(); });
+
+document.querySelectorAll('.tab-btn[data-platform]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn[data-platform]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPlatform = btn.dataset.platform;
+    populateProducts();
+    populateWeeks();
+    render();
+  });
+});
+
+document.querySelectorAll('.tab-btn[data-period]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn[data-period]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPeriod = btn.dataset.period;
+    populateProducts();
+    populateWeeks();
+    render();
+  });
+});
+
+metricSelect.addEventListener('change', render);
+weekSelect.addEventListener('change', render);
+
+populateProducts();
+populateWeeks();
+render();
+</script>
+</body>
+</html>
